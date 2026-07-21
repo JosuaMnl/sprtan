@@ -1,0 +1,208 @@
+/* ---------- Button ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 0.7em 1.3em;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-ink);
+  border-color: var(--color-accent);
+}
+.btn-primary:not(:disabled):hover {
+  background: var(--color-accent-hi);
+  border-color: var(--color-accent-hi);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-line);
+}
+.btn-ghost:not(:disabled):hover {
+  border-color: var(--color-bronze);
+  color: var(--color-bronze);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--color-danger);
+  border-color: var(--color-line);
+}
+.btn-danger:not(:disabled):hover {
+  border-color: var(--color-danger);
+  background: oklch(58% 0.19 25 / 0.12);
+}
+
+.btn-sm {
+  padding: 0.45em 0.8em;
+  font-size: var(--text-xs);
+}
+.btn-icon {
+  padding: 0.5em;
+  aspect-ratio: 1;
+}
+
+/* ---------- Card ---------- */
+.card {
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-card);
+}
+.card-hover {
+  transition:
+    transform var(--dur-normal) var(--ease-out),
+    box-shadow var(--dur-normal) var(--ease-out),
+    border-color var(--dur-normal) var(--ease-out);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--color-bronze-dim);
+}
+
+/* ---------- StatTile ---------- */
+.stat-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.stat-tile__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.stat-tile__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  color: var(--color-ink);
+  line-height: 1;
+}
+.stat-tile__value--accent {
+  color: var(--color-bronze);
+}
+.stat-tile__unit {
+  font-size: var(--text-sm);
+  color: var(--color-ink-faint);
+  margin-left: 0.15em;
+}
+
+/* ---------- Badge ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: 0.2em 0.6em;
+  border-radius: var(--radius-round);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-line);
+  color: var(--color-ink-muted);
+}
+.badge-pr {
+  color: var(--color-bronze);
+  border-color: var(--color-bronze-dim);
+  background: oklch(68% 0.1 70 / 0.1);
+}
+.badge-laurel {
+  color: var(--color-laurel);
+  border-color: oklch(65% 0.12 145 / 0.4);
+  background: oklch(65% 0.12 145 / 0.1);
+}
+
+/* ---------- Field ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+.field__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.input,
+.select {
+  width: 100%;
+  padding: 0.6em 0.75em;
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.input:hover,
+.select:hover {
+  border-color: var(--color-bronze-dim);
+}
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--color-bronze);
+}
+.input--num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+/* ---------- Empty state ---------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-2xl) var(--space-lg);
+  text-align: center;
+  color: var(--color-ink-muted);
+}
+.empty__title {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  color: var(--color-ink);
+}
+
+/* ---------- Forge flash (new PR) ---------- */
+@keyframes forge-flash {
+  0% {
+    box-shadow: 0 0 0 0 oklch(68% 0.1 70 / 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 14px oklch(68% 0.1 70 / 0);
+  }
+}
+.forge {
+  animation: forge-flash var(--dur-slow) var(--ease-out);
+}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full-bleed dark stone background: satisfies maskable safe-zone -->
+  <rect width="512" height="512" fill="#211f1c" />
+  <rect width="512" height="512" fill="url(#glow)" />
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="34%" r="60%">
+      <stop offset="0%" stop-color="#3a2a24" stop-opacity="0.7" />
+      <stop offset="70%" stop-color="#211f1c" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <!-- Bronze shield ring, centered within the maskable safe zone (~60%) -->
+  <circle cx="256" cy="256" r="150" fill="#2a2724" stroke="#b98a4b" stroke-width="14" />
+  <!-- Spartan lambda (Λ) -->
+  <path
+    d="M256 134 L360 402 L308 402 L256 254 L204 402 L152 402 Z"
+    fill="#b23a2e"
+  />
+</svg>
