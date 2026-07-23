@@ -12,6 +12,7 @@ const NAV: NavItem[] = [
   { to: '/', label: 'Arena', icon: '⌂' },
   { to: '/log', label: 'Catat', icon: '✎' },
   { to: '/progress', label: 'Progres', icon: '📈' },
+  { to: '/run', label: 'Lari', icon: '🏃' },
   { to: '/records', label: 'Rekor', icon: '🏛' },
   { to: '/exercises', label: 'Gerakan', icon: '≡' },
   { to: '/settings', label: 'Atur', icon: '⚙' },

@@ -1,0 +1,199 @@
+/* ---------- Map ---------- */
+.run-map {
+  width: 100%;
+  height: 360px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  z-index: 0; /* keep Leaflet panes below the app's fixed tabbar */
+  background: var(--color-paper-2);
+}
+.run-map--track {
+  height: clamp(240px, 40vh, 420px);
+  margin-bottom: var(--space-md);
+}
+.run-map--detail {
+  height: clamp(280px, 46vh, 480px);
+  margin-bottom: var(--space-lg);
+}
+
+/* Leaflet's default attribution/controls on our dark stone surface. */
+.run-map .leaflet-control-attribution {
+  background: oklch(20% 0.008 60 / 0.75);
+  color: var(--color-ink-faint);
+}
+.run-map .leaflet-control-attribution a {
+  color: var(--color-bronze);
+}
+
+/* ---------- Live tracking readout ---------- */
+.run-track {
+  display: flex;
+  flex-direction: column;
+}
+.run-live {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-md);
+  margin-bottom: var(--space-md);
+  background: linear-gradient(180deg, var(--color-paper-2), var(--color-paper));
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+}
+.run-live__primary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+.run-live__value {
+  font-size: var(--text-hero);
+  line-height: 1;
+  color: var(--color-accent-hi);
+  font-weight: 700;
+}
+.run-live__unit {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  color: var(--color-ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.run-live__secondary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  width: 100%;
+  max-width: 30rem;
+  border-top: 1px solid var(--color-line);
+  padding-top: var(--space-md);
+}
+.run-live__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.run-live__stat-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-faint);
+}
+.run-live__stat-value {
+  font-size: var(--text-xl);
+  color: var(--color-ink);
+}
+.run-live__stat-unit {
+  font-size: var(--text-sm);
+  color: var(--color-ink-faint);
+}
+
+/* ---------- Controls ---------- */
+.run-controls {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+.run-controls .btn {
+  min-width: 8rem;
+}
+.run-hint {
+  margin-top: var(--space-sm);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-ink-faint);
+}
+.run-alert {
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  background: oklch(58% 0.19 25 / 0.12);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+}
+
+/* ---------- Totals (history + detail) ---------- */
+.run-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+.run-totals__tile {
+  padding: var(--space-md);
+}
+
+/* ---------- Run list ---------- */
+.run-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.run-list__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+.run-list__row:hover {
+  background: var(--color-paper-3);
+  border-color: var(--color-bronze-dim);
+}
+.run-list__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.run-list__date {
+  font-weight: 600;
+}
+.run-list__pace {
+  font-size: var(--text-sm);
+  color: var(--color-ink-faint);
+}
+.run-list__nums {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.run-list__dist {
+  font-size: var(--text-lg);
+  color: var(--color-accent-hi);
+}
+.run-list__unit {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+.run-list__dur {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+}
+
+/* ---------- Detail footer ---------- */
+.run-detail__foot {
+  margin-top: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-ink-faint);
+}
+.run-detail__back {
+  color: var(--color-bronze);
+}

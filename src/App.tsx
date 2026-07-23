@@ -13,6 +13,17 @@ const ProgressPage = lazy(() =>
   import('./features/progress/ProgressPage').then((m) => ({ default: m.ProgressPage })),
 )
 
+// Leaflet is heavy — load the running views only when visited.
+const RunHistoryPage = lazy(() =>
+  import('./features/running/RunHistoryPage').then((m) => ({ default: m.RunHistoryPage })),
+)
+const RunTrackPage = lazy(() =>
+  import('./features/running/RunTrackPage').then((m) => ({ default: m.RunTrackPage })),
+)
+const RunDetailPage = lazy(() =>
+  import('./features/running/RunDetailPage').then((m) => ({ default: m.RunDetailPage })),
+)
+
 function Loading() {
   return (
     <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-muted)' }}>
@@ -38,6 +49,30 @@ const router = createHashRouter([
       },
       { path: 'records', element: <RecordsPage /> },
       { path: 'exercises', element: <ExercisesPage /> },
+      {
+        path: 'run',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RunHistoryPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'run/track',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RunTrackPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'run/:id',
+        element: (
+          <Suspense fallback={<Loading />}>
+            <RunDetailPage />
+          </Suspense>
+        ),
+      },
       { path: 'settings', element: <SettingsPage /> },
     ],
   },

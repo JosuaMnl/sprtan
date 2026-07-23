@@ -49,3 +49,37 @@ export interface SetEntry {
   /** ordering within a workout+exercise block */
   order: number
 }
+
+/** A single GPS sample recorded during a run. */
+export interface GeoPoint {
+  lat: number
+  lng: number
+  /** ms epoch timestamp of the sample */
+  t: number
+  /** altitude in meters, if the device reported it */
+  alt?: number
+  /** horizontal accuracy in meters, if reported */
+  acc?: number
+}
+
+/**
+ * A recorded run. Distance is stored canonically in meters (like weight is
+ * stored in kg); display units are derived per the user's unit setting.
+ */
+export interface Run {
+  id: string
+  /** ISO date string, YYYY-MM-DD (local day the run started) */
+  date: string
+  /** ms epoch when tracking started */
+  startedAt: number
+  /** elapsed moving time in ms (excludes paused spans) */
+  durationMs: number
+  /** total distance in meters */
+  distanceM: number
+  /** cumulative elevation gain in meters (approx, may be 0 if no altitude) */
+  elevationGainM: number
+  /** ordered GPS track */
+  path: GeoPoint[]
+  notes: string
+  createdAt: number
+}
