@@ -64,6 +64,24 @@
   opacity: 0.8;
 }
 
+.setting-link {
+  flex: 0 0 auto;
+  padding: 0.6em 1.1em;
+  border: 1px solid var(--color-bronze-dim);
+  border-radius: var(--radius-md);
+  color: var(--color-bronze);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.setting-link:hover {
+  background: var(--color-paper-3);
+  color: var(--color-ink);
+}
+
 .setting-foot {
   margin-top: var(--space-lg);
   font-family: var(--font-mono);

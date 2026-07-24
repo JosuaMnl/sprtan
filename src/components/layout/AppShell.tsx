@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Lambda } from '../ui/Lambda'
 import './AppShell.css'
 
@@ -47,6 +47,10 @@ export function AppShell() {
           Sprtan v0.1
           <br />
           ΜΟΛΩΝ ΛΑΒΕ
+          <br />
+          <Link to="/privasi" className="rail__foot-link">
+            Kebijakan Privasi
+          </Link>
         </p>
       </header>
 

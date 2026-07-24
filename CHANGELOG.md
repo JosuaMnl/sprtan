@@ -9,6 +9,13 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ### Added
 
+- **Halaman Kebijakan Privasi** (`#/privasi`) — mengungkap penyimpanan data
+  lokal, GPS, Google Fonts, OpenStreetMap, dan cookie iklan Google AdSense
+  (syarat approval AdSense). Tertaut dari Pengaturan dan side-rail.
+- **Integrasi Google AdSense** — tag loader AdSense (`ca-pub-1557856769360345`)
+  di `<head>` untuk Auto ads, plus `public/ads.txt` (otorisasi seller) agar
+  terhindar dari peringatan "Earnings at risk". Iklan hanya tampil online &
+  setelah situs di-approve Google.
 - **Kartu bagikan capaian lari mode "Dengan Peta"** — kartu share yang menyertakan
   peta jalan OpenStreetMap sebagai latar (opaque, gaya Strava), memakai proyeksi
   Web Mercator agar rute sejajar dengan jalan. Dilengkapi atribusi OSM. Toggle di

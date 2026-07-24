@@ -7,6 +7,7 @@ import { WorkoutLogPage } from './features/workout/WorkoutLogPage'
 import { RecordsPage } from './features/records/RecordsPage'
 import { ExercisesPage } from './features/exercises/ExercisesPage'
 import { SettingsPage } from './features/settings/SettingsPage'
+import { PrivacyPage } from './features/privacy/PrivacyPage'
 
 // Recharts is heavy — load the Progress view only when visited.
 const ProgressPage = lazy(() =>
@@ -74,6 +75,7 @@ const router = createHashRouter([
         ),
       },
       { path: 'settings', element: <SettingsPage /> },
+      { path: 'privasi', element: <PrivacyPage /> },
     ],
   },
 ])

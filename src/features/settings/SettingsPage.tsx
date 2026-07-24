@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/primitives'
 import { useUnit } from '../../settings/UnitContext'
@@ -39,6 +40,21 @@ export function SettingsPage() {
               </button>
             ))}
           </div>
+        </div>
+      </Card>
+
+      <Card className="setting-card">
+        <div className="setting-row">
+          <div className="setting-row__text">
+            <h2 className="setting-row__title">Privasi &amp; Data</h2>
+            <p className="setting-row__desc">
+              Datamu disimpan lokal di perangkat ini. Baca cara Sprtan menangani
+              data, lokasi, dan iklan.
+            </p>
+          </div>
+          <Link to="/privasi" className="setting-link">
+            Kebijakan Privasi →
+          </Link>
         </div>
       </Card>
 
