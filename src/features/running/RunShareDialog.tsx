@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import type { Run } from '../../db/types'
 import { Button } from '../../components/ui/primitives'
 import { useUnit } from '../../settings/UnitContext'
-import { renderRunShareCard, shareCardFilename } from './shareCard'
+import {
+  renderRunShareCard,
+  shareCardFilename,
+  type ShareCardMode,
+} from './shareCard'
 import './run.css'
 
 interface RunShareDialogProps {
@@ -14,6 +18,7 @@ type Status = 'rendering' | 'ready' | 'error'
 
 export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
   const { unit } = useUnit()
+  const [mode, setMode] = useState<ShareCardMode>('transparent')
   const [status, setStatus] = useState<Status>('rendering')
   const [blob, setBlob] = useState<Blob | null>(null)
   const [url, setUrl] = useState<string | null>(null)
@@ -23,7 +28,11 @@ export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
     let objectUrl: string | null = null
     let cancelled = false
 
-    renderRunShareCard(run, unit)
+    setStatus('rendering')
+    setBlob(null)
+    setUrl(null)
+
+    renderRunShareCard(run, unit, mode)
       .then((result) => {
         if (cancelled) return
         objectUrl = URL.createObjectURL(result)
@@ -39,13 +48,13 @@ export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
       cancelled = true
       if (objectUrl) URL.revokeObjectURL(objectUrl)
     }
-  }, [run, unit])
+  }, [run, unit, mode])
 
   function handleDownload() {
     if (!url) return
     const a = document.createElement('a')
     a.href = url
-    a.download = shareCardFilename(run)
+    a.download = shareCardFilename(run, mode)
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -53,7 +62,7 @@ export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
 
   async function handleShare() {
     if (!blob) return
-    const file = new File([blob], shareCardFilename(run), { type: 'image/png' })
+    const file = new File([blob], shareCardFilename(run, mode), { type: 'image/png' })
     const nav = navigator as Navigator & {
       canShare?: (data?: ShareData) => boolean
     }
@@ -77,6 +86,8 @@ export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
     'canShare' in navigator &&
     typeof navigator.share === 'function'
 
+  const isTransparent = mode === 'transparent'
+
   return (
     <div
       className="share-overlay"
@@ -91,8 +102,29 @@ export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
           <h2 className="share-sheet__title">Bagikan Capaian</h2>
         </header>
 
-        <div className="share-preview">
-          {status === 'rendering' && <p className="share-preview__msg">Menyiapkan gambar…</p>}
+        <div className="share-toggle" role="group" aria-label="Gaya kartu">
+          <button
+            type="button"
+            className={`share-toggle__btn ${isTransparent ? 'is-active' : ''}`}
+            aria-pressed={isTransparent}
+            onClick={() => setMode('transparent')}
+          >
+            Transparan
+          </button>
+          <button
+            type="button"
+            className={`share-toggle__btn ${!isTransparent ? 'is-active' : ''}`}
+            aria-pressed={!isTransparent}
+            onClick={() => setMode('map')}
+          >
+            Dengan Peta
+          </button>
+        </div>
+
+        <div className={`share-preview ${isTransparent ? 'share-preview--checker' : ''}`}>
+          {status === 'rendering' && (
+            <p className="share-preview__msg">Menyiapkan gambar…</p>
+          )}
           {status === 'error' && (
             <p className="share-preview__msg">Gagal membuat gambar. Coba lagi.</p>
           )}
@@ -102,7 +134,9 @@ export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
         </div>
 
         <p className="share-hint">
-          PNG transparan — tempel ke fotomu, lalu bagikan.
+          {isTransparent
+            ? 'PNG transparan — tempel ke fotomu, lalu bagikan.'
+            : 'Termasuk peta jalan (OpenStreetMap) — butuh koneksi.'}
         </p>
         {message && <p className="share-hint share-hint--warn">{message}</p>}
 
@@ -112,7 +146,11 @@ export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
               Bagikan
             </Button>
           )}
-          <Button variant={canShare ? 'ghost' : 'primary'} onClick={handleDownload} disabled={status !== 'ready'}>
+          <Button
+            variant={canShare ? 'ghost' : 'primary'}
+            onClick={handleDownload}
+            disabled={status !== 'ready'}
+          >
             Unduh
           </Button>
           <Button variant="ghost" onClick={onClose}>

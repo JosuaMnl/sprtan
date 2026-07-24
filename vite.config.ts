@@ -67,12 +67,15 @@ export default defineConfig(({ command }) => ({
           },
           {
             // OpenStreetMap tiles — cache viewed areas so they render offline.
+            // Tiles are requested with CORS (crossOrigin) so the share-card
+            // canvas can reuse them without tainting; only cache CORS-clean 200
+            // responses (not opaque 0) so those cached tiles stay canvas-safe.
             urlPattern: /^https:\/\/tile\.openstreetmap\.org\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'osm-tiles',
+              cacheName: 'osm-tiles-v2',
               expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
         ],

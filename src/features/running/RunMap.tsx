@@ -68,6 +68,9 @@ export function RunMap({ path, current, mode = 'follow', className }: RunMapProp
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         maxZoom={19}
+        // CORS-enable so tiles cached here are reusable by the share-card canvas
+        // without tainting it (see shareCard.ts).
+        crossOrigin="anonymous"
       />
 
       {path.length > 1 && (
