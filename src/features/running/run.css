@@ -187,6 +187,91 @@
   color: var(--color-ink-muted);
 }
 
+/* ---------- Detail header actions ---------- */
+.run-detail__actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+/* ---------- Share dialog ---------- */
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  background: oklch(12% 0.006 60 / 0.72);
+  backdrop-filter: blur(3px);
+}
+.share-sheet {
+  width: min(28rem, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: linear-gradient(180deg, var(--color-paper-2), var(--color-paper));
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lift);
+}
+.share-sheet__head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.share-sheet__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--color-ink);
+}
+.share-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  /* Checkerboard so the transparent PNG reads as transparent in the preview. */
+  background-color: oklch(30% 0.008 60);
+  background-image:
+    linear-gradient(45deg, oklch(24% 0.008 60) 25%, transparent 25%),
+    linear-gradient(-45deg, oklch(24% 0.008 60) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, oklch(24% 0.008 60) 75%),
+    linear-gradient(-45deg, transparent 75%, oklch(24% 0.008 60) 75%);
+  background-size: 22px 22px;
+  background-position: 0 0, 0 11px, 11px -11px, -11px 0;
+}
+.share-preview__img {
+  max-width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+}
+.share-preview__msg {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  padding: var(--space-lg);
+}
+.share-hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-ink-faint);
+  text-align: center;
+}
+.share-hint--warn {
+  color: var(--color-bronze);
+}
+.share-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
 /* ---------- Detail footer ---------- */
 .run-detail__foot {
   margin-top: var(--space-md);

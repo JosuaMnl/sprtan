@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { db } from '../../db/database'
@@ -15,6 +16,7 @@ import {
 import { paceSecPerKm } from '../../lib/geo'
 import { formatDate } from '../../lib/format'
 import { RunMap } from './RunMap'
+import { RunShareDialog } from './RunShareDialog'
 import './run.css'
 
 /** Sentinel distinguishing "query not resolved yet" from "run not found". */
@@ -24,6 +26,7 @@ export function RunDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { unit } = useUnit()
   const navigate = useNavigate()
+  const [sharing, setSharing] = useState(false)
 
   // `useLiveQuery` only re-renders when the new value differs (by ===) from the
   // stored one. Its stored default is undefined, and a missing run also resolves
@@ -77,11 +80,18 @@ export function RunDetailPage() {
         eyebrow="DROMOS"
         title={formatDate(run.date)}
         actions={
-          <Button variant="danger" size="sm" onClick={handleDelete}>
-            Hapus
-          </Button>
+          <div className="run-detail__actions">
+            <Button size="sm" onClick={() => setSharing(true)}>
+              Bagikan
+            </Button>
+            <Button variant="danger" size="sm" onClick={handleDelete}>
+              Hapus
+            </Button>
+          </div>
         }
       />
+
+      {sharing && <RunShareDialog run={run} onClose={() => setSharing(false)} />}
 
       <RunMap path={run.path} mode="fit" className="run-map--detail" />
 
