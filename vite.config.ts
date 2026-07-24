@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     VitePWA({
@@ -42,7 +42,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // Precaching the built app shell only makes sense for production
+        // builds. In dev the SW is generated against dev-dist (which holds no
+        // precacheable assets), so an empty pattern there avoids Workbox's
+        // "glob pattern doesn't match any files" warning.
+        globPatterns: command === 'build' ? ['**/*.{js,css,html,svg,png,woff2}'] : [],
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
@@ -86,4 +90,4 @@ export default defineConfig({
     css: false,
     exclude: ['node_modules', 'dist'],
   },
-})
+}))

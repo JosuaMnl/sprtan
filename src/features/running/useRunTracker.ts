@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { GeoPoint } from '../../db/types'
-import { elevationGainM, haversineM } from '../../lib/geo'
+import {
+  DEFAULT_MAX_ACCURACY_M,
+  DEFAULT_MIN_STEP_M,
+  elevationGainM,
+  haversineM,
+} from '../../lib/geo'
 
 export type RunStatus = 'idle' | 'tracking' | 'paused' | 'finished'
 
@@ -29,10 +34,11 @@ export interface RunTracker extends RunTrackerState {
   reset: () => void
 }
 
-/** Positions worse than this (meters) are discarded as too noisy. */
-const MAX_ACCURACY_M = 30
-/** Hops shorter than this (meters) are treated as GPS jitter, not movement. */
-const MIN_STEP_M = 2
+// GPS-noise thresholds are shared with geo.ts so the live tracker and the batch
+// distance helpers can never silently diverge. The live accumulation below
+// mirrors pathDistanceM's algorithm incrementally (one hop at a time).
+const MAX_ACCURACY_M = DEFAULT_MAX_ACCURACY_M
+const MIN_STEP_M = DEFAULT_MIN_STEP_M
 
 function geoErrorMessage(err: GeoLocationPositionErrorLike): string {
   switch (err.code) {
@@ -127,22 +133,37 @@ export function useRunTracker(): RunTracker {
     setStartedAt((s) => s ?? point.t)
   }, [])
 
-  const handleError = useCallback((err: GeolocationPositionError) => {
-    setError(geoErrorMessage(err))
-  }, [])
+  const handleError = useCallback(
+    (err: GeolocationPositionError) => {
+      setError(geoErrorMessage(err))
+      // PERMISSION_DENIED (1) is unrecoverable — keeping the watch and the
+      // elapsed clock running would show a "tracking" UI that records nothing.
+      // Halt back to idle so the user sees the error and can retry.
+      if (err.code === 1) {
+        clearWatch()
+        clearTick()
+        segmentStart.current = null
+        setStatus('idle')
+      }
+    },
+    [clearWatch, clearTick],
+  )
 
   const beginWatch = useCallback(() => {
     if (!navigator.geolocation) {
       setError('Perangkat ini tidak mendukung GPS.')
       return false
     }
+    // Defensive: clear any existing watch first so a double start/resume (a
+    // common accidental double-tap) can never leak an orphaned watcher.
+    clearWatch()
     watchId.current = navigator.geolocation.watchPosition(
       handlePosition,
       handleError,
       { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 },
     )
     return true
-  }, [handlePosition, handleError])
+  }, [handlePosition, handleError, clearWatch])
 
   const beginTick = useCallback(() => {
     clearTick()
@@ -154,6 +175,7 @@ export function useRunTracker(): RunTracker {
   }, [clearTick])
 
   const start = useCallback(() => {
+    if (status !== 'idle') return
     setPath([])
     setDistanceM(0)
     setElapsedMs(0)
@@ -167,7 +189,7 @@ export function useRunTracker(): RunTracker {
       setStatus('tracking')
       beginTick()
     }
-  }, [beginWatch, beginTick])
+  }, [status, beginWatch, beginTick])
 
   const pause = useCallback(() => {
     if (segmentStart.current != null) {
@@ -183,12 +205,13 @@ export function useRunTracker(): RunTracker {
   }, [clearTick, clearWatch])
 
   const resume = useCallback(() => {
+    if (status !== 'paused') return
     segmentStart.current = Date.now()
     if (beginWatch()) {
       setStatus('tracking')
       beginTick()
     }
-  }, [beginWatch, beginTick])
+  }, [status, beginWatch, beginTick])
 
   const stop = useCallback(() => {
     if (segmentStart.current != null) {

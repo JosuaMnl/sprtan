@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useBlocker, useNavigate } from 'react-router-dom'
 import { db, makeId } from '../../db/database'
 import type { Run } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
@@ -23,12 +23,49 @@ export function RunTrackPage() {
   const navigate = useNavigate()
   const tracker = useRunTracker()
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
+  const isActive = tracker.status === 'tracking' || tracker.status === 'paused'
+  const isFinished = tracker.status === 'finished'
   const pace = paceSecPerKm(tracker.distanceM, tracker.elapsedMs)
+
+  // Set just before an intentional navigation (save/discard) so the guards
+  // below don't prompt the user about leaving during our own redirect.
+  const bypassGuard = useRef(false)
+
+  // Warn on tab close / reload while a run is in progress — the whole run lives
+  // only in memory until "Simpan".
+  useEffect(() => {
+    if (!isActive) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isActive])
+
+  // Guard in-app navigation (nav taps, back button) while tracking/paused.
+  const blocker = useBlocker(
+    () => isActive && !bypassGuard.current,
+  )
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return
+    const leave = window.confirm(
+      'Lari masih berjalan. Tinggalkan halaman? Jejak yang belum disimpan akan hilang.',
+    )
+    if (leave) {
+      tracker.reset()
+      blocker.proceed()
+    } else {
+      blocker.reset()
+    }
+  }, [blocker, tracker])
 
   async function saveRun() {
     if (tracker.path.length < 2 || tracker.distanceM <= 0) return
     setSaving(true)
+    setSaveError(null)
     try {
       const startedAt = tracker.startedAt ?? Date.now()
       const run: Run = {
@@ -43,20 +80,23 @@ export function RunTrackPage() {
         createdAt: Date.now(),
       }
       await db.runs.add(run)
+      bypassGuard.current = true
       tracker.reset()
       navigate(`/run/${run.id}`)
+    } catch {
+      setSaveError(
+        'Gagal menyimpan lari. Ruang penyimpanan mungkin penuh — coba lagi.',
+      )
     } finally {
       setSaving(false)
     }
   }
 
   function discard() {
+    bypassGuard.current = true
     tracker.reset()
     navigate('/run')
   }
-
-  const isActive = tracker.status === 'tracking' || tracker.status === 'paused'
-  const isFinished = tracker.status === 'finished'
   const canSave = isFinished && tracker.path.length >= 2 && tracker.distanceM > 0
 
   return (
@@ -66,9 +106,9 @@ export function RunTrackPage() {
         title={isFinished ? 'Lari Selesai' : 'Melacak Lari'}
       />
 
-      {tracker.error && (
+      {(tracker.error || saveError) && (
         <div className="run-alert" role="alert">
-          {tracker.error}
+          {saveError ?? tracker.error}
         </div>
       )}
 

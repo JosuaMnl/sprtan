@@ -3,6 +3,14 @@ import type { GeoPoint } from '../db/types'
 /** Mean Earth radius in meters (WGS-84 spherical approximation). */
 const EARTH_RADIUS_M = 6_371_008.8
 
+/**
+ * Shared GPS-noise thresholds — the single source of truth used by both the
+ * batch helpers here and the live accumulation in useRunTracker, so tuning one
+ * can never silently diverge from the other.
+ */
+export const DEFAULT_MAX_ACCURACY_M = 30
+export const DEFAULT_MIN_STEP_M = 2
+
 function toRad(deg: number): number {
   return (deg * Math.PI) / 180
 }
@@ -33,7 +41,7 @@ export function haversineM(
  */
 export function filterByAccuracy(
   path: readonly GeoPoint[],
-  maxAccuracyM = 30,
+  maxAccuracyM = DEFAULT_MAX_ACCURACY_M,
 ): GeoPoint[] {
   return path.filter((p) => p.acc == null || p.acc <= maxAccuracyM)
 }
@@ -45,7 +53,7 @@ export function filterByAccuracy(
  */
 export function pathDistanceM(
   path: readonly GeoPoint[],
-  minStepM = 2,
+  minStepM = DEFAULT_MIN_STEP_M,
 ): number {
   let total = 0
   for (let i = 1; i < path.length; i++) {

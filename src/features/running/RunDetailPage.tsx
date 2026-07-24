@@ -17,18 +17,26 @@ import { formatDate } from '../../lib/format'
 import { RunMap } from './RunMap'
 import './run.css'
 
+/** Sentinel distinguishing "query not resolved yet" from "run not found". */
+const PENDING = Symbol('pending')
+
 export function RunDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { unit } = useUnit()
   const navigate = useNavigate()
 
-  const run = useLiveQuery(
+  // `useLiveQuery` only re-renders when the new value differs (by ===) from the
+  // stored one. Its stored default is undefined, and a missing run also resolves
+  // to undefined — so without a distinct sentinel the "not found" case would
+  // never re-render and the page would hang on "Memuat…" forever.
+  const queried = useLiveQuery(
     () => (id ? db.runs.get(id) : undefined),
     [id],
-  ) as Run | undefined
+    PENDING,
+  ) as Run | undefined | typeof PENDING
 
-  // Distinguish "still loading" from "no such run".
-  const loaded = run !== undefined || id === undefined
+  const isLoading = queried === PENDING
+  const run = queried === PENDING ? undefined : queried
 
   async function handleDelete() {
     if (!run) return
@@ -39,7 +47,15 @@ export function RunDetailPage() {
     navigate('/run')
   }
 
-  if (loaded && !run) {
+  if (isLoading) {
+    return (
+      <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-muted)' }}>
+        Memuat…
+      </p>
+    )
+  }
+
+  if (!run) {
     return (
       <div>
         <PageHeader eyebrow="DROMOS" title="Lari" />
@@ -50,14 +66,6 @@ export function RunDetailPage() {
           </Link>
         </EmptyState>
       </div>
-    )
-  }
-
-  if (!run) {
-    return (
-      <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-muted)' }}>
-        Memuat…
-      </p>
     )
   }
 
