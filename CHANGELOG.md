@@ -13,9 +13,9 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
   lokal, GPS, Google Fonts, OpenStreetMap, dan cookie iklan Google AdSense
   (syarat approval AdSense). Tertaut dari Pengaturan dan side-rail.
 - **Integrasi Google AdSense** — tag loader AdSense (`ca-pub-1557856769360345`)
-  di `<head>` untuk Auto ads, plus `public/ads.txt` (otorisasi seller) agar
-  terhindar dari peringatan "Earnings at risk". Iklan hanya tampil online &
-  setelah situs di-approve Google.
+  dan meta verifikasi `google-adsense-account` di `<head>` untuk Auto ads, plus
+  `public/ads.txt` (otorisasi seller) agar terhindar dari peringatan "Earnings at
+  risk". Iklan hanya tampil online dan setelah situs di-approve Google.
 - **Kartu bagikan capaian lari mode "Dengan Peta"** — kartu share yang menyertakan
   peta jalan OpenStreetMap sebagai latar (opaque, gaya Strava), memakai proyeksi
   Web Mercator agar rute sejajar dengan jalan. Dilengkapi atribusi OSM. Toggle di
@@ -37,6 +37,10 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ### Changed
 
+- Email kontak Kebijakan Privasi kini dibaca dari env `VITE_CONTACT_EMAIL`
+  (fallback ke default bila kosong), agar email pribadi tidak ikut ter-commit;
+  ditambah `.env.example` sebagai dokumentasi. Tanggal "Terakhir diperbarui"
+  sengaja tetap konstanta di kode agar jujur mengikuti perubahan isi.
 - Penguatan pelacakan & pemuatan lari: penanganan izin GPS ditolak menghentikan
   tracker, guard kebocoran `watchPosition`, guard navigasi saat lari berjalan,
   penanganan gagal-simpan, dan perbaikan status "tidak ditemukan" pada halaman

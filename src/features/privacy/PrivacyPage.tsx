@@ -3,8 +3,9 @@ import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/primitives'
 import './privacy.css'
 
-/** Ganti dengan alamat email kontak aktif sebelum mengajukan AdSense. */
-const CONTACT_EMAIL = 'kontak@sprtan.app'
+/** Email kontak dari env (VITE_CONTACT_EMAIL); fallback bila belum disetel. */
+const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL ?? 'kontak@sprtan.app'
+/** Tanggal isi kebijakan berubah. Perbarui manual saat mengedit teks di bawah. */
 const LAST_UPDATED = '24 Juli 2026'
 
 function Ext({ href, children }: { href: string; children: string }) {
