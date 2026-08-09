@@ -127,7 +127,11 @@ export function RunDetailPage() {
       </div>
 
       <p className="run-detail__foot">
-        Direkam {run.path.length} titik GPS ·{' '}
+        Direkam {run.path.length} titik GPS
+        {run.totalMs != null && run.totalMs > run.durationMs
+          ? ` · waktu total ${formatDuration(run.totalMs)} (termasuk jeda otomatis)`
+          : ''}{' '}
+        ·{' '}
         <Link to="/run" className="run-detail__back">
           Semua lari
         </Link>

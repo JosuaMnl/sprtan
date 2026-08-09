@@ -1,7 +1,14 @@
 /* ---------- Map ---------- */
-.run-map {
+/* The wrapper owns the size so the recenter button can be positioned over the
+   Leaflet canvas without sitting inside its pane stack. */
+.run-map-wrap {
+  position: relative;
   width: 100%;
   height: 360px;
+}
+.run-map {
+  width: 100%;
+  height: 100%;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-line);
   box-shadow: var(--shadow-card);
@@ -16,6 +23,27 @@
 .run-map--detail {
   height: clamp(280px, 46vh, 480px);
   margin-bottom: var(--space-lg);
+}
+
+.run-map__recenter {
+  position: absolute;
+  right: var(--space-sm);
+  bottom: var(--space-sm);
+  z-index: 400; /* above Leaflet's overlay panes, below the app tabbar */
+  padding: 0.45em 0.9em;
+  border: 1px solid var(--color-bronze-dim);
+  border-radius: var(--radius-md);
+  background: oklch(20% 0.008 60 / 0.88);
+  color: var(--color-bronze);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: var(--shadow-card);
+}
+.run-map__recenter:hover {
+  color: var(--color-ink);
+  border-color: var(--color-bronze);
 }
 
 /* Leaflet's default attribution/controls on our dark stone surface. */
@@ -61,12 +89,63 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+.run-live__signal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  color: var(--color-ink-muted);
+}
+.run-signal {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--color-ink-faint);
+}
+.run-signal--searching {
+  background: var(--color-ink-faint);
+  animation: run-signal-pulse 1.2s var(--ease-out) infinite;
+}
+.run-signal--weak {
+  background: var(--color-danger);
+}
+.run-signal--ok {
+  background: var(--color-bronze);
+}
+.run-signal--strong {
+  background: var(--color-laurel);
+}
+@keyframes run-signal-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .run-signal--searching {
+    animation: none;
+  }
+}
+.run-live__badge {
+  padding: 0.15em 0.55em;
+  border: 1px solid var(--color-bronze-dim);
+  border-radius: var(--radius-sm);
+  color: var(--color-bronze);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .run-live__secondary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+  gap: var(--space-sm) var(--space-md);
   width: 100%;
-  max-width: 30rem;
+  max-width: 34rem;
   border-top: 1px solid var(--color-line);
   padding-top: var(--space-md);
 }
