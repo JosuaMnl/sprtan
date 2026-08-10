@@ -60,6 +60,12 @@ export interface GeoPoint {
   alt?: number
   /** horizontal accuracy in meters, if reported */
   acc?: number
+  /**
+   * Marks the first sample after a manual pause. The route is drawn as
+   * separate polylines across such a break so a pause never renders as a
+   * straight line cutting through the map.
+   */
+  gap?: boolean
 }
 
 /**
@@ -72,8 +78,14 @@ export interface Run {
   date: string
   /** ms epoch when tracking started */
   startedAt: number
-  /** elapsed moving time in ms (excludes paused spans) */
+  /** elapsed moving time in ms (excludes manually paused and auto-paused spans) */
   durationMs: number
+  /**
+   * Wall-clock time from start to finish in ms, including auto-paused spans
+   * (traffic lights, water stops). Optional — runs recorded before auto-pause
+   * existed only have `durationMs`.
+   */
+  totalMs?: number
   /** total distance in meters */
   distanceM: number
   /** cumulative elevation gain in meters (approx, may be 0 if no altitude) */
