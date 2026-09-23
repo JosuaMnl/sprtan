@@ -40,8 +40,14 @@ export const AUTO_PAUSE_AFTER_MS = 8_000
 /** Time/space gaps that break the drawn route into separate segments. */
 export const SEGMENT_GAP_MS = 20_000
 export const SEGMENT_GAP_M = 150
-/** Process noise for the position filter, in m/s — roughly running speed. */
-export const KALMAN_PROCESS_NOISE_MPS = 3
+/** Process noise for the position filter: how hard a runner can change
+ *  velocity, as white-noise acceleration density in m²/s³. Lower smooths more
+ *  but swings wide on turns; 2 keeps a 90° street corner within a few meters. */
+export const KALMAN_ACCEL_NOISE = 2
+/** Initial velocity uncertainty (1σ, m/s) — enough to cover a sprint start. */
+export const KALMAN_INITIAL_SPEED_SD_MPS = 4
+/** Beyond this silence the velocity estimate is stale; restart the filter. */
+export const KALMAN_MAX_GAP_MS = 10_000
 /** Accuracy assumed when the device reports none. */
 export const ASSUMED_ACCURACY_M = 15
 /** Hysteresis band for elevation gain — GPS altitude noise is ±10 m or worse. */
@@ -257,50 +263,102 @@ export function pathDistanceM(
  * Position smoothing
  * ------------------------------------------------------------------ */
 
+/** Meters per degree of latitude (and of longitude at the equator). */
+const M_PER_DEG = (Math.PI / 180) * EARTH_RADIUS_M
+
+function metersPerDegLng(lat: number): number {
+  return M_PER_DEG * Math.max(1e-6, Math.cos(toRad(lat)))
+}
+
 /**
- * One-dimensional Kalman state shared by latitude and longitude. Variance is
- * kept in meters² so it can be compared directly against the accuracy radius
- * the device reports with each fix.
+ * Constant-velocity Kalman state: position plus a velocity estimate, so the
+ * filter can predict where the runner is *going* instead of only averaging
+ * where they have been.
+ *
+ * North and east are filtered independently, but they see the same accuracy
+ * and the same process noise, so their covariances are always identical and a
+ * single 2×2 matrix (`pp`, `pv`, `vv`, in m², m²/s, m²/s²) serves both.
  */
 export interface GpsFilter {
   lat: number
   lng: number
-  /** Positional variance of the current estimate, in m². */
-  varianceM2: number
+  /** Velocity estimate, in m/s. */
+  vNorth: number
+  vEast: number
+  /** Position variance, m². */
+  pp: number
+  /** Position–velocity covariance, m²/s. */
+  pv: number
+  /** Velocity variance, m²/s². */
+  vv: number
   /** ms epoch of the fix last fused in. */
   t: number
 }
 
 export function initGpsFilter(p: GeoPoint): GpsFilter {
   const acc = Math.max(1, p.acc ?? ASSUMED_ACCURACY_M)
-  return { lat: p.lat, lng: p.lng, varianceM2: acc * acc, t: p.t }
+  return {
+    lat: p.lat,
+    lng: p.lng,
+    vNorth: 0,
+    vEast: 0,
+    pp: acc * acc,
+    pv: 0,
+    vv: KALMAN_INITIAL_SPEED_SD_MPS ** 2,
+    t: p.t,
+  }
 }
 
 /**
  * Fuse one raw fix into the running estimate.
  *
  * The gain is driven by the reported accuracy: a tight 4 m fix is trusted and
- * the estimate snaps to it, while a mushy 20 m fix barely moves the estimate.
- * That adaptivity is the whole point — it flattens the zig-zag that makes a
- * naive track look wrong on the map *and* read long, without lagging behind a
- * runner who is genuinely moving (over a straight stretch the filtered position
- * converges to the true speed, so distance is preserved).
+ * the estimate snaps to it, while a mushy 20 m fix barely moves it. That
+ * flattens the zig-zag that makes a naive track look wrong on the map *and*
+ * read long.
+ *
+ * Carrying velocity is what keeps the estimate on top of the runner. A
+ * position-only filter always trails behind a moving target (by ~4 m on a good
+ * fix, ~14 m on a mediocre one), and a trailing estimate cuts every corner —
+ * the route rounds off on the map and the distance reads short. Predicting
+ * forward along the current velocity removes that lag on straights and keeps
+ * turns sharp.
  */
 export function stepGpsFilter(
   state: GpsFilter,
   p: GeoPoint,
-  processNoiseMps = KALMAN_PROCESS_NOISE_MPS,
+  accelNoise = KALMAN_ACCEL_NOISE,
 ): GpsFilter {
+  const dtMs = p.t - state.t
+  // After a long silence (backgrounded tab, tunnel) the velocity is stale and
+  // extrapolating it would fling the estimate off the route.
+  if (dtMs > KALMAN_MAX_GAP_MS) return initGpsFilter(p)
+
   const acc = Math.max(1, p.acc ?? ASSUMED_ACCURACY_M)
-  const dtSec = Math.max(0, (p.t - state.t) / 1000)
-  // Predict: uncertainty grows with how far the runner could have travelled.
-  const predicted = state.varianceM2 + dtSec * processNoiseMps * processNoiseMps
+  const dt = Math.max(0, dtMs / 1000)
+
+  // Predict: move along the velocity; uncertainty grows with possible accel.
+  const predLat = state.lat + (state.vNorth * dt) / M_PER_DEG
+  const predLng = state.lng + (state.vEast * dt) / metersPerDegLng(state.lat)
+  const pp = state.pp + 2 * dt * state.pv + dt * dt * state.vv + (accelNoise * dt ** 3) / 3
+  const pv = state.pv + dt * state.vv + (accelNoise * dt * dt) / 2
+  const vv = state.vv + accelNoise * dt
+
   // Update: weight prediction against measurement by relative confidence.
-  const gain = predicted / (predicted + acc * acc)
+  const s = pp + acc * acc
+  const kPos = pp / s
+  const kVel = pv / s
+  const innovNorthM = (p.lat - predLat) * M_PER_DEG
+  const innovEastM = (p.lng - predLng) * metersPerDegLng(predLat)
+
   return {
-    lat: state.lat + gain * (p.lat - state.lat),
-    lng: state.lng + gain * (p.lng - state.lng),
-    varianceM2: (1 - gain) * predicted,
+    lat: predLat + kPos * (p.lat - predLat),
+    lng: predLng + kPos * (p.lng - predLng),
+    vNorth: state.vNorth + kVel * innovNorthM,
+    vEast: state.vEast + kVel * innovEastM,
+    pp: (1 - kPos) * pp,
+    pv: (1 - kPos) * pv,
+    vv: vv - kVel * pv,
     t: p.t,
   }
 }
@@ -309,21 +367,21 @@ export function stepGpsFilter(
 export function smoothPoint(
   state: GpsFilter | null,
   p: GeoPoint,
-  processNoiseMps = KALMAN_PROCESS_NOISE_MPS,
+  accelNoise = KALMAN_ACCEL_NOISE,
 ): { state: GpsFilter; point: GeoPoint } {
-  const next = state ? stepGpsFilter(state, p, processNoiseMps) : initGpsFilter(p)
+  const next = state ? stepGpsFilter(state, p, accelNoise) : initGpsFilter(p)
   return { state: next, point: { ...p, lat: next.lat, lng: next.lng } }
 }
 
 /** Batch form of `smoothPoint`, for tracks recorded before smoothing existed. */
 export function smoothPath(
   path: readonly GeoPoint[],
-  processNoiseMps = KALMAN_PROCESS_NOISE_MPS,
+  accelNoise = KALMAN_ACCEL_NOISE,
 ): GeoPoint[] {
   let state: GpsFilter | null = null
   const out: GeoPoint[] = []
   for (const p of path) {
-    const next = smoothPoint(state, p, processNoiseMps)
+    const next = smoothPoint(state, p, accelNoise)
     state = next.state
     out.push(next.point)
   }

@@ -46,8 +46,8 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
      fix rusak, bukan ditambahkan sebagai jarak hantu;
   3. *penghalusan Kalman* — posisi difusikan dengan bobot akurasi tiap fix,
      memangkas zig-zag yang membuat rute patah-patah di peta **dan** membuat
-     jarak melar (simulasi lari lurus 300 m dengan derau ±8 m: 692 m mentah →
-     335 m setelah dihaluskan);
+     jarak melar (simulasi lari lurus 300 m dengan derau acak ±8 m tiap detik:
+     692 m mentah → 397 m setelah dihaluskan);
   4. *lantai jitter adaptif* — ambang batas ikut akurasi (2–6 m), dan titik
      jangkar hanya bergeser saat sebuah hop benar-benar dihitung, sehingga
      langkah lambat tetap terakumulasi alih-alih dibuang satu per satu;
@@ -81,6 +81,15 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ### Fixed
 
+- **Rute tidak lagi memotong tikungan dan jarak tidak lagi terbaca pendek.**
+  Filter Kalman dulu hanya memperkirakan posisi, sehingga titik hasil saringan
+  selalu tertinggal di belakang pelari (±4 m pada akurasi 5 m, ±14 m pada akurasi
+  15 m) dan membulatkan setiap belokan. Kini filter juga memperkirakan kecepatan
+  (model kecepatan konstan) dan memprediksi posisi berikutnya, lalu di-reset bila
+  sinyal hilang lebih dari 10 detik. Simulasi 3 putaran blok 100 m (1.200 m):
+  1.141 m dengan filter lama → 1.238 m sekarang. Hasilnya lebih dekat ke perilaku
+  Strava yang cenderung sedikit lebih panjang, bukan lebih pendek. Lari yang
+  sudah tersimpan tidak berubah.
 - Jarak live dan jarak yang dihitung ulang dari `run.path` kini identik.
   Sebelumnya tracker memakai titik terakhir *yang dihitung* sebagai acuan
   sementara `pathDistanceM` memakai titik sebelumnya apa adanya, sehingga kedua
