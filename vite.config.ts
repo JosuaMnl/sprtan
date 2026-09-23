@@ -19,8 +19,8 @@ export default defineConfig(({ command }) => ({
         scope: '/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#211f1c',
-        theme_color: '#211f1c',
+        background_color: '#f6f5f3',
+        theme_color: '#f6f5f3',
         categories: ['health', 'fitness', 'sports'],
         icons: [
           {

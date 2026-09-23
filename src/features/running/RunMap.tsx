@@ -111,21 +111,27 @@ export function RunMap({ path, current, mode = 'follow', className }: RunMapProp
           crossOrigin="anonymous"
         />
 
+        {/* Colours come from CSS (.run-route*) so the route follows the
+            light/dark surface tokens; SVG attributes can't read var(). */}
+        {segments.map((positions, i) =>
+          positions.length > 1 ? (
+            <Polyline
+              key={`glow-${i}`}
+              positions={positions}
+              pathOptions={{ className: 'run-route-glow', weight: 14, lineJoin: 'round', lineCap: 'round' }}
+              smoothFactor={1.2}
+              interactive={false}
+            />
+          ) : null,
+        )}
         {segments.map((positions, i) =>
           positions.length > 1 ? (
             <Polyline
               key={`seg-${i}`}
               positions={positions}
-              // Rounded joins plus a dark casing underneath: the route stays
-              // readable over busy tiles and reads as one continuous stroke
+              // Rounded joins keep the route reading as one continuous stroke
               // instead of a chain of visibly welded segments.
-              pathOptions={{
-                color: '#d9443c',
-                weight: 5,
-                opacity: 0.95,
-                lineJoin: 'round',
-                lineCap: 'round',
-              }}
+              pathOptions={{ className: 'run-route', weight: 5, lineJoin: 'round', lineCap: 'round' }}
               smoothFactor={1.2}
             />
           ) : null,
@@ -135,7 +141,7 @@ export function RunMap({ path, current, mode = 'follow', className }: RunMapProp
           <CircleMarker
             center={[start.lat, start.lng]}
             radius={7}
-            pathOptions={{ color: '#c9a44a', fillColor: '#c9a44a', fillOpacity: 1, weight: 2 }}
+            pathOptions={{ className: 'run-marker-start', weight: 3, fillOpacity: 1 }}
           />
         )}
 
@@ -143,7 +149,7 @@ export function RunMap({ path, current, mode = 'follow', className }: RunMapProp
           <CircleMarker
             center={[current.lat, current.lng]}
             radius={8}
-            pathOptions={{ color: '#fff', fillColor: '#d9443c', fillOpacity: 1, weight: 3 }}
+            pathOptions={{ className: 'run-marker-current', weight: 3, fillOpacity: 1 }}
           />
         )}
 

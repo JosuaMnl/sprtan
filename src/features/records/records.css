@@ -4,12 +4,19 @@
   gap: var(--space-xl);
 }
 .records__title {
-  font-size: var(--text-xl);
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-display-s);
+  font-weight: 800;
   margin-bottom: var(--space-md);
-  padding-bottom: var(--space-xs);
-  border-bottom: 2px solid var(--color-bronze-dim);
   color: var(--color-ink);
+}
+.records__title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-line);
 }
 .records__grid {
   display: grid;
@@ -18,10 +25,10 @@
 }
 
 .pr-card {
-  padding: var(--space-md);
+  padding: var(--space-lg);
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-lg);
 }
 .pr-card__head {
   display: flex;
@@ -31,38 +38,45 @@
 }
 .pr-card__name {
   font-size: var(--text-lg);
-  text-transform: uppercase;
+  font-weight: 800;
   min-width: 0;
 }
 .pr-card__stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
-  padding-top: var(--space-sm);
-  border-top: 1px solid var(--color-line);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .pr-stat {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
   gap: var(--space-2xs);
+  padding-inline: var(--space-sm);
+  border-left: 1px solid var(--color-line);
+  min-width: 0;
+}
+.pr-stat:first-child {
+  padding-left: 0;
+  border-left: 0;
 }
 .pr-stat__label {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-ink-faint);
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .pr-stat__val {
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--color-ink);
+  white-space: nowrap;
 }
 .pr-stat__val--accent {
-  color: var(--color-bronze);
+  color: var(--color-accent);
 }
 .pr-stat__unit {
   font-size: var(--text-xs);
   color: var(--color-ink-faint);
-  margin-left: 0.1em;
+  margin-left: 0.2em;
 }
