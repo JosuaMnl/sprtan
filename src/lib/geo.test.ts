@@ -215,6 +215,45 @@ describe('smoothPath', () => {
     expect(smoothError).toBeLessThan(rawError / 3)
   })
 
+  it('keeps up with a moving runner instead of trailing behind', () => {
+    // Clean 3 m/s run due east with a mediocre 15 m accuracy. A position-only
+    // filter sat ~14 m behind the runner here; carrying velocity closes the gap.
+    const raw = Array.from({ length: 60 }, (_, i) => east(i * 3, i * 1000, { acc: 15 }))
+    const last = smoothPath(raw)[raw.length - 1]
+    expect(haversineM(last, raw[raw.length - 1])).toBeLessThan(1)
+  })
+
+  it('does not cut the corners of a block loop short', () => {
+    // 3 laps of a 100 m square at 3 m/s, ±3 m of noise: 1200 m of truth.
+    const noise = makeNoise(20260923)
+    const truthM = 1200
+    const raw: GeoPoint[] = Array.from({ length: truthM / 3 + 1 }, (_, i) => {
+      const u = (i * 3) % 400
+      const [x, y] =
+        u < 100 ? [u, 0] : u < 200 ? [100, u - 100] : u < 300 ? [300 - u, 100] : [0, 400 - u]
+      return {
+        lat: (y + noise() * 3) / M_PER_DEG,
+        lng: (x + noise() * 3) / M_PER_DEG,
+        t: i * 1000,
+        acc: 10,
+      }
+    })
+    const distanceM = pathDistanceM(smoothPath(raw))
+    // A lagging filter rounds every corner off and reads several percent short.
+    expect(distanceM).toBeGreaterThan(truthM * 0.98)
+    expect(distanceM).toBeLessThan(truthM * 1.05)
+  })
+
+  it('restarts after a long silence instead of extrapolating a stale velocity', () => {
+    const raw = [
+      ...Array.from({ length: 10 }, (_, i) => east(i * 3, i * 1000, { acc: 5 })),
+      // 60 s of silence; carrying 3 m/s across it would overshoot by ~140 m.
+      east(67, 69_000, { acc: 5 }),
+    ]
+    const last = smoothPath(raw)[raw.length - 1]
+    expect(last.lng).toBe(raw[raw.length - 1].lng)
+  })
+
   it('preserves the metadata of each fix', () => {
     const [first] = smoothPath([pt(1, 2, { t: 5, acc: 7, alt: 120 })])
     expect(first.t).toBe(5)
