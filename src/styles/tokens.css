@@ -1,48 +1,70 @@
-/* Hallmark · macrostructure: Bento Grid · tone: austere/disciplined · anchor hue: warm (crimson 25°)
- * theme: custom "ANDREIA" (Spartan Greek) · paper oklch(20% 0.008 60) dark
- * accent oklch(52% 0.17 25) crimson · bronze oklch(68% 0.10 70)
- * axes: dark / classical-serif / warm
- * pre-emit critique: P5 H4 E4 S5 R5 V4
+/* Hallmark · genre: playful · macrostructure: Stacked Cards (app) · design-system: design.md · designed-as-app
+ * theme: studied-DNA (source: image, 2 user references) + Spartan crimson accent
+ * paper oklch(96.5% 0.004 80) light · oklch(17% 0.014 265) dark (user/OS theme)
+ * accent oklch(54% 0.2 25) crimson · lime oklch(88% 0.19 125) · indigo oklch(52% 0.19 275)
+ * display: Bricolage Grotesque 800 · body: Geist 400–600
+ * axes: light / grotesk-sans / warm
+ * pre-emit critique: P5 H5 E4 S5 R4 V5
  */
 
 :root {
-  /* ---- Surfaces (dark stone) ---- */
-  --color-paper: oklch(20% 0.008 60);
-  --color-paper-2: oklch(26% 0.01 60);
-  --color-paper-3: oklch(31% 0.012 60);
-  --color-line: oklch(38% 0.012 60);
+  color-scheme: light;
 
-  /* ---- Text (marble) ---- */
-  --color-ink: oklch(93% 0.01 85);
-  --color-ink-muted: oklch(72% 0.01 80);
-  --color-ink-faint: oklch(56% 0.01 80);
+  /* ---- Surfaces (light) ---- */
+  --color-paper: oklch(96.5% 0.004 80);
+  --color-paper-2: oklch(93.5% 0.006 80);
+  --color-paper-3: oklch(90% 0.008 80);
+  --color-surface: oklch(99.5% 0.002 80);
+  --color-line: oklch(88% 0.006 80);
+
+  /* ---- Text ---- */
+  --color-ink: oklch(19% 0.01 60);
+  --color-ink-muted: oklch(45% 0.01 60);
+  --color-ink-faint: oklch(56% 0.008 60);
+  /* The grey first line of every two-tone heading (large text, ≥3:1). */
+  --color-ink-ghost: oklch(62% 0.006 70);
 
   /* ---- Accents ---- */
-  --color-accent: oklch(52% 0.17 25); /* Spartan crimson */
-  --color-accent-hi: oklch(60% 0.19 25);
-  --color-bronze: oklch(68% 0.1 70); /* aged bronze */
-  --color-bronze-dim: oklch(50% 0.07 70);
-  --color-laurel: oklch(65% 0.12 145); /* success / PR */
-  --color-focus: oklch(68% 0.1 70);
+  --color-accent: oklch(54% 0.2 25); /* Spartan crimson */
+  --color-accent-hi: oklch(49% 0.19 25);
+  --color-accent-ink: oklch(99% 0.005 25);
+  --color-accent-soft: oklch(94% 0.035 25);
+  --color-lime: oklch(88% 0.19 125); /* goals, PRs, "live" */
+  --color-lime-ink: oklch(30% 0.08 125);
+  --color-lime-soft: oklch(95% 0.06 125);
+  --color-indigo: oklch(52% 0.19 275); /* pace */
+  --color-indigo-ink: oklch(98% 0.01 275);
+  --color-indigo-soft: oklch(94% 0.03 275);
+  --color-focus: oklch(52% 0.19 275);
+  --color-route: oklch(58% 0.21 25);
+  --color-route-glow: oklch(58% 0.21 25 / 0.28);
+  --color-route-start: oklch(88% 0.19 125);
+  --color-scrim: oklch(19% 0.01 60 / 0.55);
+  /* Filled "selected" pills (active tab, segmented controls, ink button). */
+  --color-contrast: oklch(19% 0.01 60);
+  --color-contrast-ink: oklch(96.5% 0.004 80);
 
   /* ---- Semantic ---- */
-  --color-danger: oklch(58% 0.19 25);
+  --color-danger: oklch(52% 0.2 25);
+  --color-danger-soft: oklch(94% 0.035 25);
+  --color-warn: oklch(72% 0.15 70);
 
   /* ---- Fonts ---- */
-  --font-display: 'Cinzel', Georgia, serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: 'Bricolage Grotesque', 'Geist', system-ui, sans-serif;
+  --font-body: 'Geist', system-ui, -apple-system, sans-serif;
 
   /* ---- Type scale ---- */
-  --text-hero: clamp(2.75rem, 1.5rem + 5vw, 5rem);
-  --text-display: clamp(2rem, 1.3rem + 3vw, 3.25rem);
-  --text-display-s: clamp(1.5rem, 1.1rem + 1.8vw, 2.25rem);
+  --text-mega: clamp(4rem, 2.6rem + 7vw, 7rem); /* live run distance */
+  --text-hero: clamp(3.25rem, 2.2rem + 5vw, 5rem);
+  --text-display: clamp(2.25rem, 1.6rem + 3vw, 3.25rem);
+  --text-display-s: clamp(1.75rem, 1.3rem + 1.8vw, 2.25rem);
   --text-2xl: 1.75rem;
   --text-xl: 1.375rem;
   --text-lg: 1.125rem;
   --text-base: 1rem;
   --text-sm: 0.875rem;
   --text-xs: 0.75rem;
+  --text-2xs: 0.6875rem;
 
   /* ---- Spacing (4pt) ---- */
   --space-2xs: 0.25rem;
@@ -55,17 +77,18 @@
   --space-3xl: 6rem;
 
   /* ---- Radius ---- */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 14px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
   --radius-round: 999px;
 
   /* ---- Rules / borders ---- */
   --rule-hair: 1px solid var(--color-line);
 
   /* ---- Shadow ---- */
-  --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.3), 0 8px 24px oklch(0% 0 0 / 0.35);
-  --shadow-lift: 0 4px 8px oklch(0% 0 0 / 0.35), 0 16px 40px oklch(0% 0 0 / 0.45);
+  --shadow-card: 0 1px 2px oklch(19% 0.01 60 / 0.04), 0 10px 30px -18px oklch(19% 0.01 60 / 0.18);
+  --shadow-lift: 0 2px 4px oklch(19% 0.01 60 / 0.06), 0 18px 40px -20px oklch(19% 0.01 60 / 0.3);
+  --shadow-accent: 0 14px 34px -16px oklch(54% 0.2 25 / 0.6);
 
   /* ---- Motion ---- */
   --dur-fast: 140ms;
@@ -74,4 +97,42 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.5, 0, 0.75, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ---- Layout ---- */
+  --tabbar-h: 4.25rem;
+}
+
+/* Dark theme — chosen by the user (toggle / Pengaturan) or the OS, and applied
+ * to <html> as data-theme="dark" by ThemeProvider. It re-maps the same token
+ * names, so every component adapts without its own dark variant. */
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-paper: oklch(17% 0.014 265);
+  --color-paper-2: oklch(21% 0.016 265);
+  --color-paper-3: oklch(26% 0.018 265);
+  --color-surface: oklch(22% 0.016 265);
+  --color-line: oklch(30% 0.016 265);
+
+  --color-ink: oklch(97% 0.005 265);
+  --color-ink-muted: oklch(76% 0.012 265);
+  --color-ink-faint: oklch(64% 0.014 265);
+  --color-ink-ghost: oklch(62% 0.014 265);
+
+  --color-accent: oklch(58% 0.21 25);
+  --color-accent-hi: oklch(63% 0.21 25);
+  --color-accent-soft: oklch(30% 0.07 25);
+  --color-lime-soft: oklch(30% 0.06 125);
+  --color-indigo: oklch(55% 0.2 275);
+  --color-indigo-soft: oklch(30% 0.06 275);
+  --color-focus: oklch(88% 0.19 125);
+  --color-route: oklch(66% 0.2 35);
+  --color-route-glow: oklch(66% 0.2 35 / 0.35);
+  --color-danger-soft: oklch(30% 0.07 25);
+  --color-scrim: oklch(8% 0.01 265 / 0.7);
+  --color-contrast: oklch(34% 0.02 265);
+  --color-contrast-ink: oklch(97% 0.005 265);
+
+  --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.3), 0 12px 30px -16px oklch(0% 0 0 / 0.6);
+  --shadow-lift: 0 2px 6px oklch(0% 0 0 / 0.35), 0 20px 44px -18px oklch(0% 0 0 / 0.7);
 }

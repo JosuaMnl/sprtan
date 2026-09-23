@@ -1,34 +1,39 @@
 .log-date {
   min-width: 170px;
 }
-.log-caption {
-  font-family: var(--font-mono);
-  color: var(--color-bronze);
-  letter-spacing: 0.05em;
-  margin-top: calc(var(--space-xl) * -1 + var(--space-xs));
-  margin-bottom: var(--space-lg);
-}
 .log-add-card {
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-lg);
+  background: var(--color-paper-2);
+  border-color: transparent;
+  box-shadow: none;
 }
-.log-add {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-md);
-  flex-wrap: wrap;
+.log-add-card .select {
+  background: var(--color-surface);
+  min-height: 3rem;
+  font-weight: 500;
 }
-.log-add__select {
-  flex: 1 1 260px;
+.log-manage {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-ink-muted);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.log-manage:hover {
+  color: var(--color-ink);
 }
 
 .log-blocks {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
-  gap: var(--space-lg);
+  gap: var(--space-md);
 }
 
 .block {
-  background: var(--color-paper-2);
+  background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
@@ -39,15 +44,13 @@
 }
 .block__head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-sm);
-  padding-bottom: var(--space-sm);
-  border-bottom: 2px solid var(--color-accent);
 }
 .block__title {
-  font-size: var(--text-lg);
-  text-transform: uppercase;
+  font-size: var(--text-xl);
+  font-weight: 800;
 }
 .block__empty {
   color: var(--color-ink-faint);
@@ -60,48 +63,59 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 .set-list__head,
 .set-row {
   display: grid;
-  grid-template-columns: 2.5rem 1fr 1fr 1.6fr 2rem;
+  grid-template-columns: 2.25rem minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.5fr) 2rem;
   align-items: center;
   gap: var(--space-xs);
 }
 .set-list__head {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  font-size: var(--text-2xs);
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-ink-faint);
-  padding-bottom: var(--space-2xs);
+  padding-bottom: var(--space-xs);
 }
 .set-row {
   padding: var(--space-xs) 0;
-  border-bottom: 1px solid var(--color-line);
-  border-radius: var(--radius-sm);
+  border-top: 1px solid var(--color-line);
 }
 .set-row .num {
   font-size: var(--text-base);
+  font-weight: 600;
 }
 .set-row__idx {
-  color: var(--color-ink-faint);
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-paper-2);
+  color: var(--color-ink-muted);
+  font-size: var(--text-xs) !important;
 }
 .set-row__orm {
-  color: var(--color-bronze);
+  color: var(--color-accent);
   display: inline-flex;
   align-items: center;
   gap: var(--space-2xs);
 }
 .set-row__crown {
-  color: var(--color-laurel);
-  font-size: 0.65rem;
+  display: inline-grid;
+  place-items: center;
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-round);
+  background: var(--color-lime);
+  color: var(--color-lime-ink);
+  font-size: 0.6rem;
 }
 .set-row__del {
   justify-self: end;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 2rem;
+  height: 2rem;
   display: grid;
   place-items: center;
   background: transparent;
@@ -109,19 +123,30 @@
   color: var(--color-ink-faint);
   font-size: 1.2rem;
   line-height: 1;
-  border-radius: var(--radius-sm);
-  transition: color var(--dur-fast) var(--ease-out);
+  border-radius: 50%;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
 }
 .set-row__del:hover {
   color: var(--color-danger);
+  background: var(--color-danger-soft);
 }
 
 .set-add {
   display: flex;
   align-items: flex-end;
   gap: var(--space-sm);
-  padding-top: var(--space-xs);
+  padding: var(--space-md);
+  margin: 0 calc(var(--space-lg) * -1) calc(var(--space-lg) * -1);
+  border-top: 1px solid var(--color-line);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: var(--color-paper);
 }
 .set-add__field {
   flex: 1 1 0;
+  min-width: 0;
+}
+.set-add .btn {
+  min-height: 2.75rem;
 }

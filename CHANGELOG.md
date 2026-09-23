@@ -7,6 +7,38 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Redesign UI seluruh aplikasi**: gaya aplikasi lari modern mengikuti 2
+  referensi: tema terang untuk semua halaman, layar tracking lari (`#/run/track`)
+  bergelap dengan peta malam. Aksen tetap crimson Spartan, ditambah lime (target,
+  rekor) dan indigo (pace). Font baru Bricolage Grotesque + Geist menggantikan
+  Cinzel, Inter, dan IBM Plex Mono. Judul halaman dua warna ("Riwayat / Lari"),
+  kartu sudut bulat besar, ikon SVG buatan sendiri menggantikan emoji di navigasi.
+  Logo lambda dan nama SPRTAN dipertahankan; teks Yunani dan nama "Arena"
+  (sekarang "Beranda") dihapus. Sistem desain dikunci di `design.md`.
+- **Beranda**: kartu hero volume pekan ini, cincin "hari aktif" 7 hari terakhir
+  (latihan + lari), ringkasan lari 7 hari, dan tombol "Catat Latihan" yang
+  menempel di atas tab bar di HP.
+- **Layar lari**: jarak raksasa, pill pace indigo, baris statistik bergaris,
+  tombol Jeda/Selesai besar berdampingan; di desktop peta tampil di kolom kanan.
+- Kartu bagikan lari memakai font baru.
+- **Navigasi disederhanakan dari 7 jadi 4 menu**: Beranda, Catat, Lari, Progres.
+  Rekor pribadi jadi tab di dalam Progres (Grafik / Rekor pribadi), Daftar
+  gerakan dibuka dari halaman Catat dan Pengaturan, Pengaturan pindah ke ikon
+  gerigi di pojok kanan atas (HP) atau bawah rail (desktop). Semua URL lama
+  tetap berfungsi. Halaman turunan (Gerakan, Pengaturan, Privasi, Detail lari)
+  punya tombol kembali. Tambah link "Lewati ke konten" untuk pengguna keyboard
+  (memfokuskan konten tanpa mengubah rute hash).
+- **Tema terang/gelap berlaku untuk semua halaman**: pilih lewat tombol
+  bulan/matahari di pojok kanan atas atau di Pengaturan (Terang / Gelap / Ikuti
+  HP, default mengikuti HP). Pilihan disimpan dan diterapkan sebelum halaman
+  tampil, jadi tidak ada kedip putih. Layar lari tidak lagi dipaksa gelap. Ikon
+  Pengaturan digambar ulang sebagai roda gigi agar tidak tertukar dengan ikon
+  tema.
+- **Catat latihan**: memilih gerakan langsung menambahkannya ke sesi (tanpa
+  tombol "Tambah"), daftar dikelompokkan per otot.
+
 ### Added
 
 - **Halaman Kebijakan Privasi** (`#/privasi`) — mengungkap penyimpanan data

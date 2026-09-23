@@ -4,7 +4,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { db } from '../../db/database'
 import type { Run } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
-import { Button, Card, EmptyState, StatTile } from '../../components/ui/primitives'
+import { Button, Card, EmptyState, StatRow, buttonClass } from '../../components/ui/primitives'
+import { Icon } from '../../components/ui/Icon'
 import { useUnit } from '../../settings/UnitContext'
 import {
   DISTANCE_UNIT_LABEL,
@@ -17,6 +18,7 @@ import { paceSecPerKm } from '../../lib/geo'
 import { formatDate } from '../../lib/format'
 import { RunMap } from './RunMap'
 import { RunShareDialog } from './RunShareDialog'
+import { runTitle } from './shareCard'
 import './run.css'
 
 /** Sentinel distinguishing "query not resolved yet" from "run not found". */
@@ -52,20 +54,18 @@ export function RunDetailPage() {
 
   if (isLoading) {
     return (
-      <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-muted)' }}>
-        Memuat…
-      </p>
+      <p className="loading">Memuat…</p>
     )
   }
 
   if (!run) {
     return (
       <div>
-        <PageHeader eyebrow="DROMOS" title="Lari" />
+        <PageHeader lead="Detail" title="Lari" back={{ to: '/run', label: 'Semua lari' }} />
         <EmptyState title="Lari tidak ditemukan.">
           <p>Catatan ini mungkin sudah dihapus.</p>
-          <Link to="/run">
-            <Button>Kembali ke Daftar</Button>
+          <Link to="/run" className={buttonClass()}>
+            Kembali ke Daftar
           </Link>
         </EmptyState>
       </div>
@@ -77,14 +77,17 @@ export function RunDetailPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="DROMOS"
-        title={formatDate(run.date)}
+        lead={formatDate(run.date)}
+        title={runTitle(run.startedAt)}
+        back={{ to: '/run', label: 'Semua lari' }}
         actions={
           <div className="run-detail__actions">
             <Button size="sm" onClick={() => setSharing(true)}>
+              <Icon name="share" size={16} className="btn__icon" />
               Bagikan
             </Button>
             <Button variant="danger" size="sm" onClick={handleDelete}>
+              <Icon name="trash" size={16} className="btn__icon" />
               Hapus
             </Button>
           </div>
@@ -93,49 +96,35 @@ export function RunDetailPage() {
 
       {sharing && <RunShareDialog run={run} onClose={() => setSharing(false)} />}
 
-      <RunMap path={run.path} mode="fit" className="run-map--detail" />
+      <div className="run-detail">
+        <RunMap path={run.path} mode="fit" className="run-map--detail" />
 
-      <div className="run-totals">
-        <Card className="run-totals__tile" hover>
-          <StatTile
-            label="Jarak"
-            value={<span className="num">{formatDistance(run.distanceM, unit)}</span>}
-            unit={DISTANCE_UNIT_LABEL[unit]}
-            accent
-          />
-        </Card>
-        <Card className="run-totals__tile" hover>
-          <StatTile
-            label="Waktu"
-            value={<span className="num">{formatDuration(run.durationMs)}</span>}
-          />
-        </Card>
-        <Card className="run-totals__tile" hover>
-          <StatTile
-            label="Pace"
-            value={<span className="num">{formatPace(pace, unit)}</span>}
-            unit={PACE_UNIT_LABEL[unit]}
-          />
-        </Card>
-        <Card className="run-totals__tile" hover>
-          <StatTile
-            label="Elevasi"
-            value={<span className="num">{Math.round(run.elevationGainM)}</span>}
-            unit="m"
+        <Card className="run-detail__summary">
+          <p className="run-detail__dist">
+            <span className="num-display">{formatDistance(run.distanceM, unit)}</span>
+            <span className="run-detail__unit">{DISTANCE_UNIT_LABEL[unit]}</span>
+          </p>
+          <p className="pace-pill">
+            <Icon name="clock" size={18} />
+            <span className="visually-hidden">Pace rata-rata</span>
+            <span className="num">{formatPace(pace, unit)}</span>
+            <span className="pace-pill__unit">{PACE_UNIT_LABEL[unit]}</span>
+          </p>
+          <StatRow
+            items={[
+              { label: 'Waktu', value: formatDuration(run.durationMs) },
+              { label: 'Elevasi', value: Math.round(run.elevationGainM), unit: 'm' },
+              { label: 'Titik GPS', value: run.path.length },
+            ]}
           />
         </Card>
       </div>
 
-      <p className="run-detail__foot">
-        Direkam {run.path.length} titik GPS
-        {run.totalMs != null && run.totalMs > run.durationMs
-          ? ` · waktu total ${formatDuration(run.totalMs)} (termasuk jeda otomatis)`
-          : ''}{' '}
-        ·{' '}
-        <Link to="/run" className="run-detail__back">
-          Semua lari
-        </Link>
-      </p>
+      {run.totalMs != null && run.totalMs > run.durationMs && (
+        <p className="run-detail__foot">
+          Waktu total {formatDuration(run.totalMs)}, termasuk jeda otomatis.
+        </p>
+      )}
     </div>
   )
 }

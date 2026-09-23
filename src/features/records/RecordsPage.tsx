@@ -10,10 +10,11 @@ import {
   type SetEntry,
 } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
-import { Badge, Button, Card, EmptyState } from '../../components/ui/primitives'
+import { Badge, Card, EmptyState, buttonClass } from '../../components/ui/primitives'
 import { computeAllPRs } from '../../lib/prCalculator'
 import { useUnit } from '../../settings/UnitContext'
 import { UNIT_LABEL, toDisplayWeight } from '../../lib/units'
+import { ProgressTabs } from '../progress/ProgressTabs'
 import './records.css'
 
 export function RecordsPage() {
@@ -48,13 +49,14 @@ export function RecordsPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="ΤΑΝ Ἢ ΕΠΙ ΤΑΣ" title="Rekor" />
+      <PageHeader lead="Pantau" title="Progres" />
+      <ProgressTabs />
 
       {total === 0 ? (
         <EmptyState title="Belum ada rekor.">
-          <p>Rekor pribadi lahir dari besi yang terangkat. Catat latihan pertamamu.</p>
-          <Link to="/log">
-            <Button>Catat Latihan</Button>
+          <p>Rekor pribadi muncul otomatis setelah kamu mencatat set.</p>
+          <Link to="/log" className={buttonClass()}>
+            Catat Latihan
           </Link>
         </EmptyState>
       ) : (
