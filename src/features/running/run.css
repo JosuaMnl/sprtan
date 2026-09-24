@@ -27,7 +27,13 @@
   stroke: var(--color-route);
 }
 .run-route-glow {
-  stroke: var(--color-route-glow);
+  stroke: var(--color-route);
+}
+/* Below the route (overlay pane is 400). Opacity on the whole pane keeps the
+   joints between route chunks from stacking into darker spots. */
+.run-map .run-route-glow-pane {
+  z-index: 399;
+  opacity: var(--route-glow-opacity);
 }
 .run-marker-start {
   stroke: var(--color-surface);

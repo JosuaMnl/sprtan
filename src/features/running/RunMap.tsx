@@ -1,14 +1,20 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CircleMarker,
   MapContainer,
+  Pane,
   Polyline,
   TileLayer,
   useMap,
 } from 'react-leaflet'
-import type { LatLngExpression, LatLngTuple } from 'leaflet'
+import type { LatLngExpression, LatLngTuple, PathOptions } from 'leaflet'
 import type { GeoPoint } from '../../db/types'
-import { haversineM, splitSegments } from '../../lib/geo'
+import { haversineM } from '../../lib/geo'
+import {
+  EMPTY_ROUTE_CHUNKS,
+  extendRouteChunks,
+  type RouteChunkState,
+} from '../../lib/routeChunks'
 import 'leaflet/dist/leaflet.css'
 import './run.css'
 
@@ -17,6 +23,23 @@ const DEFAULT_CENTER: LatLngExpression = [-6.2088, 106.8456]
 
 /** Don't nudge the map for movement smaller than this (in meters). */
 const RECENTER_THRESHOLD_M = 12
+
+// Styles are module constants on purpose: react-leaflet compares `pathOptions`
+// by reference and calls `setStyle()` (a redraw) whenever it gets a new object.
+// Inline literals would restyle every layer on every parent render.
+
+// Colours live in CSS (see the `.run-route*` / `.run-marker-*` classes).
+// Rounded joins and caps: the route reads as one continuous stroke instead of
+// a chain of visibly welded chunks.
+const ROUTE_STYLE: PathOptions = {
+  className: 'run-route',
+  weight: 5,
+  lineJoin: 'round',
+  lineCap: 'round',
+}
+const ROUTE_GLOW_STYLE: PathOptions = { ...ROUTE_STYLE, className: 'run-route-glow', weight: 14 }
+const START_STYLE: PathOptions = { className: 'run-marker-start', weight: 3, fillOpacity: 1 }
+const CURRENT_STYLE: PathOptions = { className: 'run-marker-current', weight: 3, fillOpacity: 1 }
 
 interface RunMapProps {
   path: readonly GeoPoint[]
@@ -84,15 +107,41 @@ function FitController({ path }: { path: readonly GeoPoint[] }) {
   return null
 }
 
-export function RunMap({ path, current, mode = 'follow', className }: RunMapProps) {
+/**
+ * Memoized so the live readouts ticking twice a second on the tracking page
+ * don't re-render the map; it only updates when the route or position changes.
+ */
+export const RunMap = memo(function RunMap({
+  path,
+  current,
+  mode = 'follow',
+  className,
+}: RunMapProps) {
   const [following, setFollowing] = useState(true)
   const stopFollowing = useCallback(() => setFollowing(false), [])
 
   // Paused spans and signal dropouts become separate polylines — one unbroken
   // line would draw a straight bar across everything the runner didn't run.
-  const segments = useMemo(() => splitSegments(path).map(toLatLngs), [path])
+  // Built incrementally: a new GPS fix only touches the newest chunk, so older
+  // polylines keep their positions array and Leaflet never redraws them.
+  const chunkState = useRef<RouteChunkState>(EMPTY_ROUTE_CHUNKS)
+  const chunks = useMemo(() => {
+    // Idempotent for the same `path`, so a repeated render pass is harmless.
+    chunkState.current = extendRouteChunks(chunkState.current, path)
+    return chunkState.current.chunks
+  }, [path])
 
   const start = path[0]
+  // Stable tuples: react-leaflet calls `setLatLng()` whenever `center` changes
+  // by reference, even if the coordinates are the same.
+  const startCenter = useMemo<LatLngTuple | null>(
+    () => (start ? [start.lat, start.lng] : null),
+    [start],
+  )
+  const currentCenter = useMemo<LatLngTuple | null>(
+    () => (current ? [current.lat, current.lng] : null),
+    [current],
+  )
   const center: LatLngExpression = current
     ? [current.lat, current.lng]
     : start
@@ -112,45 +161,40 @@ export function RunMap({ path, current, mode = 'follow', className }: RunMapProp
         />
 
         {/* Colours come from CSS (.run-route*) so the route follows the
-            light/dark surface tokens; SVG attributes can't read var(). */}
-        {segments.map((positions, i) =>
-          positions.length > 1 ? (
+            light/dark surface tokens; SVG attributes can't read var().
+            The glow sits in its own pane whose opacity is applied to the pane
+            as a whole: consecutive chunks share a joint point, and per-stroke
+            alpha would darken every place where two chunks overlap. */}
+        <Pane name="routeGlowPane" className="run-route-glow-pane">
+          {chunks.map((chunk) =>
+            chunk.positions.length > 1 ? (
+              <Polyline
+                key={chunk.key}
+                positions={chunk.positions}
+                pathOptions={ROUTE_GLOW_STYLE}
+                smoothFactor={1.2}
+                interactive={false}
+              />
+            ) : null,
+          )}
+        </Pane>
+        {chunks.map((chunk) =>
+          chunk.positions.length > 1 ? (
             <Polyline
-              key={`glow-${i}`}
-              positions={positions}
-              pathOptions={{ className: 'run-route-glow', weight: 14, lineJoin: 'round', lineCap: 'round' }}
-              smoothFactor={1.2}
-              interactive={false}
-            />
-          ) : null,
-        )}
-        {segments.map((positions, i) =>
-          positions.length > 1 ? (
-            <Polyline
-              key={`seg-${i}`}
-              positions={positions}
-              // Rounded joins keep the route reading as one continuous stroke
-              // instead of a chain of visibly welded segments.
-              pathOptions={{ className: 'run-route', weight: 5, lineJoin: 'round', lineCap: 'round' }}
+              key={chunk.key}
+              positions={chunk.positions}
+              pathOptions={ROUTE_STYLE}
               smoothFactor={1.2}
             />
           ) : null,
         )}
 
-        {start && (
-          <CircleMarker
-            center={[start.lat, start.lng]}
-            radius={7}
-            pathOptions={{ className: 'run-marker-start', weight: 3, fillOpacity: 1 }}
-          />
+        {startCenter && (
+          <CircleMarker center={startCenter} radius={7} pathOptions={START_STYLE} />
         )}
 
-        {current && (
-          <CircleMarker
-            center={[current.lat, current.lng]}
-            radius={8}
-            pathOptions={{ className: 'run-marker-current', weight: 3, fillOpacity: 1 }}
-          />
+        {currentCenter && (
+          <CircleMarker center={currentCenter} radius={8} pathOptions={CURRENT_STYLE} />
         )}
 
         {mode === 'follow' ? (
@@ -175,4 +219,4 @@ export function RunMap({ path, current, mode = 'follow', className }: RunMapProp
       )}
     </div>
   )
-}
+})

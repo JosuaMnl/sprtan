@@ -70,6 +70,18 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ### Changed
 
+- **Peta lari lebih hemat baterai saat melacak.** `RunMap` kini di-memo dan
+  gaya garis/penanda jadi konstanta, sehingga tick pembacaan 500 ms tidak lagi
+  memicu `setStyle()`/`setLatLng()` Leaflet di setiap layer. Rute juga dibangun
+  bertahap (`lib/routeChunks.ts`) dalam potongan maksimal 400 titik: fix GPS
+  baru hanya memperbarui potongan terakhir, potongan lama tidak digambar ulang.
+  Hasil uji dengan GPS simulasi 900 titik: perubahan SVG turun dari 25.218
+  menjadi 2.855 (sekitar 9x lebih sedikit), dan saat tidak ada fix baru turun
+  dari 208 per 4 detik menjadi 0. Aturan pemutusan segmen dipindah ke
+  `isSegmentBreak` (dipakai bersama oleh `splitSegments`), perilakunya tetap.
+  Lapisan glow rute kini berada di pane Leaflet tersendiri dan transparansinya
+  diterapkan ke pane (token `--route-glow-opacity` menggantikan
+  `--color-route-glow`), supaya sambungan antar-potongan tidak tampak menggelap.
 - **Akurasi pelacakan lari & pace disetarakan dengan Strava.** Setiap fix GPS
   kini melewati pipeline bertahap yang sama, baik saat live maupun saat dihitung
   ulang dari jejak tersimpan:

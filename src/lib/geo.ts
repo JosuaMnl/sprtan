@@ -398,32 +398,42 @@ export interface SegmentOptions {
 }
 
 /**
+ * Should the route be broken between two consecutive track points? True at an
+ * explicit pause marker, after a long silence, or across a jump too large to be
+ * a normal stride.
+ */
+export function isSegmentBreak(
+  prev: GeoPoint,
+  point: GeoPoint,
+  opts: SegmentOptions = {},
+): boolean {
+  const { maxGapMs = SEGMENT_GAP_MS, maxGapM = SEGMENT_GAP_M } = opts
+  return (
+    point.gap === true ||
+    point.t - prev.t > maxGapMs ||
+    haversineM(prev, point) > maxGapM
+  )
+}
+
+/**
  * Split a track into the pieces that should be drawn as separate polylines.
  *
  * Drawing one unbroken line means a paused run — or a stretch where the signal
  * dropped — renders as a straight bar cutting across the map through buildings
- * the runner never went near. A break is taken at an explicit pause marker, at
- * a long silence, or at a jump too large to be a normal stride.
+ * the runner never went near. Breaks are placed per `isSegmentBreak`.
  */
 export function splitSegments(
   path: readonly GeoPoint[],
   opts: SegmentOptions = {},
 ): GeoPoint[][] {
-  const { maxGapMs = SEGMENT_GAP_MS, maxGapM = SEGMENT_GAP_M } = opts
   const segments: GeoPoint[][] = []
   let current: GeoPoint[] = []
 
   for (const point of path) {
     const prev = current[current.length - 1]
-    if (prev) {
-      const broke =
-        point.gap === true ||
-        point.t - prev.t > maxGapMs ||
-        haversineM(prev, point) > maxGapM
-      if (broke) {
-        segments.push(current)
-        current = []
-      }
+    if (prev && isSegmentBreak(prev, point, opts)) {
+      segments.push(current)
+      current = []
     }
     current.push(point)
   }
