@@ -70,6 +70,25 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ### Changed
 
+- **Riwayat lari dan Beranda tidak lagi memuat rute GPS.** Rute kini disimpan di
+  tabel IndexedDB terpisah `runPaths` (schema Dexie v3); tabel `runs` hanya
+  berisi ringkasan (jarak, durasi, tanggal, dll.). Sebelumnya setiap buka Riwayat
+  atau Beranda ikut membaca ribuan titik GPS dari semua lari. Data lama
+  dipindahkan otomatis saat aplikasi pertama dibuka, dalam satu transaksi:
+  gagal di tengah berarti tidak ada yang berubah. Simpan dan hapus lari lewat
+  `src/db/runs.ts` agar ringkasan dan rute selalu ditulis/dihapus bersama.
+  **Catatan rilis:** setelah perangkat naik ke v3, build lama (v2) tidak bisa
+  membuka database lagi, jadi jangan rollback ke versi sebelum perubahan ini.
+- **Aplikasi tidak lagi menunggu Google Fonts untuk mulai.** Stylesheet font
+  dimuat tanpa memblokir render (`rel="preload"` lalu ditukar jadi stylesheet),
+  karena stylesheet pihak ketiga yang memblokir juga menahan eksekusi script
+  aplikasi; di koneksi lambat saat lari, aplikasi bisa tertahan lama. Teks
+  tampil dengan font cadangan lalu berganti saat font tiba. Geist diminta
+  sebagai rentang `400..700` (CSS font 20 blok jadi 5).
+- **Iklan AdSense ditahan di layar pelacakan lari** lewat `pauseAdRequests`
+  (`src/lib/ads.ts`), termasuk saat aplikasi dibuka langsung ke `#/run/track`.
+  Pengecualian halaman di dashboard AdSense tidak bisa dipakai karena tidak
+  mendukung URL dengan `#`. Iklan dilanjutkan begitu keluar dari layar lari.
 - **Peta lari lebih hemat baterai saat melacak.** `RunMap` kini di-memo dan
   gaya garis/penanda jadi konstanta, sehingga tick pembacaan 500 ms tidak lagi
   memicu `setStyle()`/`setLatLng()` Leaflet di setiap layer. Rute juga dibangun

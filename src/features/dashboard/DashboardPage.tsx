@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
-import type { Exercise, Run, SetEntry, Workout } from '../../db/types'
+import type { Exercise, RunSummary, SetEntry, Workout } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card, EmptyState, StatRow, buttonClass } from '../../components/ui/primitives'
 import { Icon } from '../../components/ui/Icon'
@@ -35,7 +35,7 @@ export function DashboardPage() {
   const workouts = useLiveQuery(() => db.workouts.toArray(), [], []) as Workout[]
   const sets = useLiveQuery(() => db.sets.toArray(), [], []) as SetEntry[]
   const exercises = useLiveQuery(() => db.exercises.toArray(), [], []) as Exercise[]
-  const runs = useLiveQuery(() => db.runs.toArray(), [], []) as Run[]
+  const runs = useLiveQuery(() => db.runs.toArray(), [], []) as RunSummary[]
 
   const exName = useMemo(
     () => new Map(exercises.map((e) => [e.id, e.name])),

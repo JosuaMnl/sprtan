@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useBlocker, useNavigate } from 'react-router-dom'
-import { db, makeId } from '../../db/database'
+import { makeId } from '../../db/database'
+import { saveRun as storeRun } from '../../db/runs'
 import type { Run } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button, StatRow } from '../../components/ui/primitives'
@@ -14,6 +15,7 @@ import {
   formatPace,
 } from '../../lib/distance'
 import { DEFAULT_MAX_ACCURACY_M, paceSecPerKm } from '../../lib/geo'
+import { setAdRequestsPaused } from '../../lib/ads'
 import { partOfDay, todayISO } from '../../lib/format'
 import { useRunTracker, type RunStatus } from './useRunTracker'
 import { RunMap } from './RunMap'
@@ -81,6 +83,13 @@ export function RunTrackPage() {
     return () => window.removeEventListener('beforeunload', handler)
   }, [isActive])
 
+  // No new ad requests while the tracker is open: an ad loading mid-run costs
+  // network and CPU and can shift the controls under the runner's thumb.
+  useEffect(() => {
+    setAdRequestsPaused(true)
+    return () => setAdRequestsPaused(false)
+  }, [])
+
   // Guard in-app navigation (nav taps, back button) while tracking/paused.
   const blocker = useBlocker(
     () => isActive && !bypassGuard.current,
@@ -116,7 +125,7 @@ export function RunTrackPage() {
         notes: '',
         createdAt: Date.now(),
       }
-      await db.runs.add(run)
+      await storeRun(run)
       bypassGuard.current = true
       tracker.reset()
       navigate(`/run/${run.id}`)

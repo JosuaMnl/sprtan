@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { db } from '../../db/database'
+import { deleteRun, getRun } from '../../db/runs'
 import type { Run } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button, Card, EmptyState, StatRow, buttonClass } from '../../components/ui/primitives'
@@ -35,7 +35,7 @@ export function RunDetailPage() {
   // to undefined — so without a distinct sentinel the "not found" case would
   // never re-render and the page would hang on "Memuat…" forever.
   const queried = useLiveQuery(
-    () => (id ? db.runs.get(id) : undefined),
+    () => (id ? getRun(id) : undefined),
     [id],
     PENDING,
   ) as Run | undefined | typeof PENDING
@@ -48,7 +48,7 @@ export function RunDetailPage() {
     if (!confirm(`Hapus lari ${formatDate(run.date)}? Tindakan ini tidak bisa dibatalkan.`)) {
       return
     }
-    await db.runs.delete(run.id)
+    await deleteRun(run.id)
     navigate('/run')
   }
 

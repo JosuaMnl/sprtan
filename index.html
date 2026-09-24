@@ -30,13 +30,26 @@
     <meta name="apple-mobile-web-app-title" content="Sprtan" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Loaded without blocking: a render-blocking third-party stylesheet also
+         holds back the app's module script, so a slow or flaky connection
+         (common mid-run) would stall startup. Text paints in the fallback font
+         and swaps when these arrive (display=swap). -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Geist:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Geist:wght@400..700&display=swap"
+      onload="this.onload = null; this.rel = 'stylesheet'"
     />
     <title>Sprtan — Angkat. Catat. Taklukkan.</title>
     <!-- Google AdSense (Auto ads dikonfigurasi dari dashboard AdSense) -->
     <meta name="google-adsense-account" content="ca-pub-1557856769360345" />
+    <!-- Hold ad requests when the app opens straight onto the run tracker.
+         Keep in sync with src/lib/ads.ts. -->
+    <script>
+      if (location.hash.indexOf('#/run/track') === 0) {
+        ;(window.adsbygoogle = window.adsbygoogle || []).pauseAdRequests = 1
+      }
+    </script>
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1557856769360345"
