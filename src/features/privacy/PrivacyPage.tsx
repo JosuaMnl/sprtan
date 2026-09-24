@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card } from '../../components/ui/primitives'
 import './privacy.css'
@@ -19,7 +18,7 @@ function Ext({ href, children }: { href: string; children: string }) {
 export function PrivacyPage() {
   return (
     <div>
-      <PageHeader eyebrow="ΝΟΜΟΣ" title="Kebijakan Privasi" />
+      <PageHeader lead="Kebijakan" title="Privasi" back={{ to: '/settings', label: 'Pengaturan' }} />
 
       <Card className="prose">
         <p className="prose__meta">Terakhir diperbarui: {LAST_UPDATED}</p>
@@ -135,12 +134,6 @@ export function PrivacyPage() {
           .
         </p>
       </Card>
-
-      <p className="prose__back">
-        <Link to="/" className="prose__link">
-          ← Kembali ke Arena
-        </Link>
-      </p>
     </div>
   )
 }

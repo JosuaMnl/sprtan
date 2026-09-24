@@ -20,16 +20,9 @@ html {
 body {
   font-family: var(--font-body);
   font-size: var(--text-base);
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--color-ink);
   background-color: var(--color-paper);
-  background-image:
-    radial-gradient(
-      ellipse 80% 50% at 50% -10%,
-      oklch(30% 0.02 40 / 0.5),
-      transparent 70%
-    );
-  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   min-height: 100vh;
@@ -41,9 +34,9 @@ h3,
 h4 {
   font-family: var(--font-display);
   font-style: normal;
-  font-weight: 600;
-  line-height: 1.08;
-  letter-spacing: 0.01em;
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
   margin: 0;
   overflow-wrap: anywhere;
   min-width: 0;
@@ -71,20 +64,33 @@ button {
   font-size: inherit;
 }
 
-/* Monospace numerals everywhere they carry data */
+/* Tabular numerals wherever numbers carry data, so live values don't jitter. */
 .num {
-  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
 }
 
-/* Small caps eyebrow — sparing, disciplined */
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.18em;
+/* Big display numbers (distance, volume). */
+.num-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Small uppercase label — "PEKAN INI", "PACE". */
+.label {
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-bronze);
+  color: var(--color-ink-muted);
+}
+
+.loading {
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
 }
 
 :focus-visible {
@@ -95,10 +101,9 @@ button {
 
 ::selection {
   background: var(--color-accent);
-  color: var(--color-ink);
+  color: var(--color-accent-ink);
 }
 
-/* Thin "Doric" scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -107,11 +112,11 @@ button {
   background: var(--color-paper);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-line);
+  background: var(--color-paper-3);
   border-radius: var(--radius-round);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-bronze-dim);
+  background: var(--color-ink-ghost);
 }
 
 .visually-hidden {

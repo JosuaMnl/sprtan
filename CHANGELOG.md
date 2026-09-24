@@ -7,6 +7,38 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Redesign UI seluruh aplikasi**: gaya aplikasi lari modern mengikuti 2
+  referensi: tema terang untuk semua halaman, layar tracking lari (`#/run/track`)
+  bergelap dengan peta malam. Aksen tetap crimson Spartan, ditambah lime (target,
+  rekor) dan indigo (pace). Font baru Bricolage Grotesque + Geist menggantikan
+  Cinzel, Inter, dan IBM Plex Mono. Judul halaman dua warna ("Riwayat / Lari"),
+  kartu sudut bulat besar, ikon SVG buatan sendiri menggantikan emoji di navigasi.
+  Logo lambda dan nama SPRTAN dipertahankan; teks Yunani dan nama "Arena"
+  (sekarang "Beranda") dihapus. Sistem desain dikunci di `design.md`.
+- **Beranda**: kartu hero volume pekan ini, cincin "hari aktif" 7 hari terakhir
+  (latihan + lari), ringkasan lari 7 hari, dan tombol "Catat Latihan" yang
+  menempel di atas tab bar di HP.
+- **Layar lari**: jarak raksasa, pill pace indigo, baris statistik bergaris,
+  tombol Jeda/Selesai besar berdampingan; di desktop peta tampil di kolom kanan.
+- Kartu bagikan lari memakai font baru.
+- **Navigasi disederhanakan dari 7 jadi 4 menu**: Beranda, Catat, Lari, Progres.
+  Rekor pribadi jadi tab di dalam Progres (Grafik / Rekor pribadi), Daftar
+  gerakan dibuka dari halaman Catat dan Pengaturan, Pengaturan pindah ke ikon
+  gerigi di pojok kanan atas (HP) atau bawah rail (desktop). Semua URL lama
+  tetap berfungsi. Halaman turunan (Gerakan, Pengaturan, Privasi, Detail lari)
+  punya tombol kembali. Tambah link "Lewati ke konten" untuk pengguna keyboard
+  (memfokuskan konten tanpa mengubah rute hash).
+- **Tema terang/gelap berlaku untuk semua halaman**: pilih lewat tombol
+  bulan/matahari di pojok kanan atas atau di Pengaturan (Terang / Gelap / Ikuti
+  HP, default mengikuti HP). Pilihan disimpan dan diterapkan sebelum halaman
+  tampil, jadi tidak ada kedip putih. Layar lari tidak lagi dipaksa gelap. Ikon
+  Pengaturan digambar ulang sebagai roda gigi agar tidak tertukar dengan ikon
+  tema.
+- **Catat latihan**: memilih gerakan langsung menambahkannya ke sesi (tanpa
+  tombol "Tambah"), daftar dikelompokkan per otot.
+
 ### Added
 
 - **Halaman Kebijakan Privasi** (`#/privasi`) — mengungkap penyimpanan data
@@ -47,6 +79,9 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
   menjadi 2.855 (sekitar 9x lebih sedikit), dan saat tidak ada fix baru turun
   dari 208 per 4 detik menjadi 0. Aturan pemutusan segmen dipindah ke
   `isSegmentBreak` (dipakai bersama oleh `splitSegments`), perilakunya tetap.
+  Lapisan glow rute kini berada di pane Leaflet tersendiri dan transparansinya
+  diterapkan ke pane (token `--route-glow-opacity` menggantikan
+  `--color-route-glow`), supaya sambungan antar-potongan tidak tampak menggelap.
 - **Akurasi pelacakan lari & pace disetarakan dengan Strava.** Setiap fix GPS
   kini melewati pipeline bertahap yang sama, baik saat live maupun saat dihitung
   ulang dari jejak tersimpan:
@@ -55,8 +90,8 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
      fix rusak, bukan ditambahkan sebagai jarak hantu;
   3. *penghalusan Kalman* — posisi difusikan dengan bobot akurasi tiap fix,
      memangkas zig-zag yang membuat rute patah-patah di peta **dan** membuat
-     jarak melar (simulasi lari lurus 300 m dengan derau ±8 m: 692 m mentah →
-     335 m setelah dihaluskan);
+     jarak melar (simulasi lari lurus 300 m dengan derau acak ±8 m tiap detik:
+     692 m mentah → 397 m setelah dihaluskan);
   4. *lantai jitter adaptif* — ambang batas ikut akurasi (2–6 m), dan titik
      jangkar hanya bergeser saat sebuah hop benar-benar dihitung, sehingga
      langkah lambat tetap terakumulasi alih-alih dibuang satu per satu;
@@ -90,6 +125,15 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ### Fixed
 
+- **Rute tidak lagi memotong tikungan dan jarak tidak lagi terbaca pendek.**
+  Filter Kalman dulu hanya memperkirakan posisi, sehingga titik hasil saringan
+  selalu tertinggal di belakang pelari (±4 m pada akurasi 5 m, ±14 m pada akurasi
+  15 m) dan membulatkan setiap belokan. Kini filter juga memperkirakan kecepatan
+  (model kecepatan konstan) dan memprediksi posisi berikutnya, lalu di-reset bila
+  sinyal hilang lebih dari 10 detik. Simulasi 3 putaran blok 100 m (1.200 m):
+  1.141 m dengan filter lama → 1.238 m sekarang. Hasilnya lebih dekat ke perilaku
+  Strava yang cenderung sedikit lebih panjang, bukan lebih pendek. Lari yang
+  sudah tersimpan tidak berubah.
 - Jarak live dan jarak yang dihitung ulang dari `run.path` kini identik.
   Sebelumnya tracker memakai titik terakhir *yang dihitung* sebagai acuan
   sementara `pathDistanceM` memakai titik sebelumnya apa adanya, sehingga kedua

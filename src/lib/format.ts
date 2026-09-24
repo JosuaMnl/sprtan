@@ -25,3 +25,13 @@ export function formatDateShort(iso: string): string {
   if (!m || !d) return iso
   return `${d} ${MONTHS[m - 1]}`
 }
+
+export type PartOfDay = 'pagi' | 'siang' | 'sore' | 'malam'
+
+/** Indonesian part of day for an hour 0–23 (same bands as the run titles). */
+export function partOfDay(hour: number): PartOfDay {
+  if (hour >= 4 && hour < 10) return 'pagi'
+  if (hour >= 10 && hour < 15) return 'siang'
+  if (hour >= 15 && hour < 18) return 'sore'
+  return 'malam'
+}

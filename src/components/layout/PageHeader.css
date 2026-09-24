@@ -5,18 +5,61 @@
   gap: var(--space-md);
   flex-wrap: wrap;
   margin-bottom: var(--space-xl);
-  padding-bottom: var(--space-md);
-  border-bottom: 1px solid var(--color-line);
 }
 .page-head__text {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2xs);
+  gap: var(--space-sm);
   min-width: 0;
 }
+.page-head__back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  min-height: 2.25rem;
+  padding: 0 0.9em 0 0.7em;
+  margin-bottom: var(--space-2xs);
+  border-radius: var(--radius-round);
+  background: var(--color-paper-2);
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+.page-head__back:hover {
+  background: var(--color-paper-3);
+  color: var(--color-ink);
+}
+.page-head__back-icon {
+  transform: scaleX(-1);
+}
 .page-head__title {
+  display: flex;
+  flex-direction: column;
   font-size: var(--text-display);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+.page-head__lead {
+  color: var(--color-ink-ghost);
+}
+.page-head__main {
+  color: var(--color-ink);
+}
+.page-head__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: var(--color-ink-muted);
 }
 .page-head__actions {
   display: flex;
@@ -24,8 +67,27 @@
   flex-wrap: wrap;
 }
 
+/* Status dot shared by page headers ("● SEDANG LARI"). */
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-lime);
+}
+.status-dot--accent {
+  background: var(--color-accent);
+}
+.status-dot--muted {
+  background: var(--color-ink-faint);
+}
+.status-sep {
+  color: var(--color-ink-faint);
+}
+
 @media (max-width: 860px) {
   .page-head {
     align-items: flex-start;
+    margin-bottom: var(--space-lg);
   }
 }

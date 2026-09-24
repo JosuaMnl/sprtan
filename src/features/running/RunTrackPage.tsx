@@ -3,7 +3,8 @@ import { useBlocker, useNavigate } from 'react-router-dom'
 import { db, makeId } from '../../db/database'
 import type { Run } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
-import { Button } from '../../components/ui/primitives'
+import { Button, StatRow } from '../../components/ui/primitives'
+import { Icon } from '../../components/ui/Icon'
 import { useUnit } from '../../settings/UnitContext'
 import {
   DISTANCE_UNIT_LABEL,
@@ -13,8 +14,8 @@ import {
   formatPace,
 } from '../../lib/distance'
 import { DEFAULT_MAX_ACCURACY_M, paceSecPerKm } from '../../lib/geo'
-import { todayISO } from '../../lib/format'
-import { useRunTracker } from './useRunTracker'
+import { partOfDay, todayISO } from '../../lib/format'
+import { useRunTracker, type RunStatus } from './useRunTracker'
 import { RunMap } from './RunMap'
 import './run.css'
 
@@ -38,6 +39,14 @@ function gpsSignal(
   }
   if (accuracyM > 10) return { level: 'ok', label: `GPS cukup · ±${acc} m` }
   return { level: 'strong', label: `GPS kuat · ±${acc} m` }
+}
+
+/** Header status line per tracker phase ("● SEDANG LARI · 24:16"). */
+const STATUS_COPY: Record<RunStatus, { label: string; dot: string }> = {
+  idle: { label: 'Siap', dot: 'status-dot--muted' },
+  tracking: { label: 'Sedang lari', dot: '' },
+  paused: { label: 'Dijeda', dot: 'status-dot--accent' },
+  finished: { label: 'Selesai', dot: 'status-dot--muted' },
 }
 
 export function RunTrackPage() {
@@ -127,63 +136,66 @@ export function RunTrackPage() {
   }
   const canSave = isFinished && tracker.path.length >= 2 && tracker.distanceM > 0
 
+  const dayPart = partOfDay(new Date(tracker.startedAt ?? Date.now()).getHours())
+  // "Lari / Pagi" while running, "Lari / Selesai" once stopped.
+  const title = isFinished ? 'Selesai' : dayPart.charAt(0).toUpperCase() + dayPart.slice(1)
+  const phase = STATUS_COPY[tracker.status]
+
+  const stats = [
+    { label: 'Waktu', value: formatDuration(tracker.elapsedMs) },
+    ...(isFinished
+      ? []
+      : [{ label: 'Pace rata²', value: formatPace(avgPace, unit), unit: PACE_UNIT_LABEL[unit] }]),
+    { label: 'Elevasi', value: Math.round(tracker.elevationGainM), unit: 'm' },
+  ]
+
   return (
     <div className="run-track">
-      <PageHeader
-        eyebrow="DROMOS"
-        title={isFinished ? 'Lari Selesai' : 'Melacak Lari'}
-      />
+      <div className="run-track__readout">
+        <PageHeader
+          back={isActive ? undefined : { to: '/run', label: 'Riwayat' }}
+          lead="Lari"
+          title={title}
+          status={
+            <>
+              <span className={`status-dot ${phase.dot}`} aria-hidden="true" />
+              {phase.label}
+              <span className="status-sep">·</span>
+              <span className="num">{formatDuration(tracker.elapsedMs)}</span>
+            </>
+          }
+        />
 
-      {(tracker.error || saveError) && (
-        <div className="run-alert" role="alert">
-          {saveError ?? tracker.error}
-        </div>
-      )}
-
-      <div className="run-live">
-        <div className="run-live__primary">
-          <span className="run-live__value num">{formatDistance(tracker.distanceM, unit)}</span>
-          <span className="run-live__unit">{DISTANCE_UNIT_LABEL[unit]}</span>
-        </div>
-
-        {isActive && (
-          <div className="run-live__signal">
-            <span className={`run-signal run-signal--${signal.level}`} aria-hidden="true" />
-            <span>{signal.label}</span>
-            {tracker.autoPaused && (
-              <span className="run-live__badge">Jeda otomatis</span>
-            )}
+        {(tracker.error || saveError) && (
+          <div className="run-alert" role="alert">
+            {saveError ?? tracker.error}
           </div>
         )}
 
-        <div className="run-live__secondary">
-          <div className="run-live__stat">
-            <span className="run-live__stat-label">Waktu</span>
-            <span className="run-live__stat-value num">{formatDuration(tracker.elapsedMs)}</span>
-          </div>
-          <div className="run-live__stat">
-            <span className="run-live__stat-label">{isFinished ? 'Pace' : 'Pace Kini'}</span>
-            <span className="run-live__stat-value num">
-              {formatPace(livePace, unit)}
-              <span className="run-live__stat-unit"> {PACE_UNIT_LABEL[unit]}</span>
+        <div className="run-live">
+          <p className="run-live__primary">
+            <span className="run-live__value num-display">
+              {formatDistance(tracker.distanceM, unit)}
             </span>
-          </div>
-          {!isFinished && (
-            <div className="run-live__stat">
-              <span className="run-live__stat-label">Pace Rata²</span>
-              <span className="run-live__stat-value num">
-                {formatPace(avgPace, unit)}
-                <span className="run-live__stat-unit"> {PACE_UNIT_LABEL[unit]}</span>
-              </span>
-            </div>
+            <span className="run-live__unit">{DISTANCE_UNIT_LABEL[unit]}</span>
+          </p>
+
+          <p className="pace-pill">
+            <Icon name="clock" size={18} />
+            <span className="visually-hidden">{isFinished ? 'Pace rata-rata' : 'Pace kini'}</span>
+            <span className="num">{formatPace(livePace, unit)}</span>
+            <span className="pace-pill__unit">{PACE_UNIT_LABEL[unit]}</span>
+          </p>
+
+          {isActive && (
+            <p className="run-live__signal">
+              <span className={`run-signal run-signal--${signal.level}`} aria-hidden="true" />
+              <span>{signal.label}</span>
+              {tracker.autoPaused && <span className="run-live__badge">Jeda otomatis</span>}
+            </p>
           )}
-          <div className="run-live__stat">
-            <span className="run-live__stat-label">Elevasi</span>
-            <span className="run-live__stat-value num">
-              {Math.round(tracker.elevationGainM)}
-              <span className="run-live__stat-unit"> m</span>
-            </span>
-          </div>
+
+          <StatRow className="run-live__stats" items={stats} />
         </div>
       </div>
 
@@ -194,58 +206,69 @@ export function RunTrackPage() {
         className="run-map--track"
       />
 
-      <div className="run-controls">
-        {tracker.status === 'idle' && (
-          <Button onClick={tracker.start}>Mulai</Button>
-        )}
+      <div className="run-track__actions">
+        <div className="run-controls">
+          {tracker.status === 'idle' && (
+            <Button size="lg" block onClick={tracker.start}>
+              <Icon name="play" className="btn__icon" />
+              Mulai Lari
+            </Button>
+          )}
 
-        {tracker.status === 'tracking' && (
-          <>
-            <Button variant="ghost" onClick={tracker.pause}>
-              Jeda
-            </Button>
-            <Button variant="danger" onClick={tracker.stop}>
-              Selesai
-            </Button>
-          </>
-        )}
+          {tracker.status === 'tracking' && (
+            <>
+              <Button variant="ghost" size="lg" onClick={tracker.pause}>
+                <Icon name="pause" className="btn__icon" />
+                Jeda
+              </Button>
+              <Button size="lg" onClick={tracker.stop}>
+                <Icon name="stop" className="btn__icon" />
+                Selesai
+              </Button>
+            </>
+          )}
 
-        {tracker.status === 'paused' && (
-          <>
-            <Button onClick={tracker.resume}>Lanjut</Button>
-            <Button variant="danger" onClick={tracker.stop}>
-              Selesai
-            </Button>
-          </>
-        )}
+          {tracker.status === 'paused' && (
+            <>
+              <Button variant="ghost" size="lg" onClick={tracker.resume}>
+                <Icon name="play" className="btn__icon" />
+                Lanjut
+              </Button>
+              <Button size="lg" onClick={tracker.stop}>
+                <Icon name="stop" className="btn__icon" />
+                Selesai
+              </Button>
+            </>
+          )}
+
+          {isFinished && (
+            <>
+              <Button variant="ghost" size="lg" onClick={discard} disabled={saving}>
+                Buang
+              </Button>
+              <Button size="lg" onClick={saveRun} disabled={!canSave || saving}>
+                {saving ? 'Menyimpan…' : 'Simpan Lari'}
+              </Button>
+            </>
+          )}
+        </div>
 
         {isFinished && (
-          <>
-            <Button onClick={saveRun} disabled={!canSave || saving}>
-              {saving ? 'Menyimpan…' : 'Simpan'}
-            </Button>
-            <Button variant="ghost" onClick={discard} disabled={saving}>
-              Buang
-            </Button>
-          </>
+          <p className="run-hint">
+            Waktu bergerak {formatDuration(tracker.elapsedMs)} dari total{' '}
+            {formatDuration(tracker.totalElapsedMs)} · {tracker.path.length} titik GPS
+          </p>
+        )}
+        {isFinished && !canSave && (
+          <p className="run-hint">Jarak terlalu pendek untuk disimpan.</p>
+        )}
+        {isActive && (
+          <p className="run-hint">
+            Jam berhenti otomatis saat kamu berhenti bergerak. Biarkan layar
+            menyala agar GPS terus merekam jejakmu.
+          </p>
         )}
       </div>
-
-      {isFinished && (
-        <p className="run-hint">
-          Waktu bergerak {formatDuration(tracker.elapsedMs)} dari total{' '}
-          {formatDuration(tracker.totalElapsedMs)} · {tracker.path.length} titik GPS
-        </p>
-      )}
-      {isFinished && !canSave && (
-        <p className="run-hint">Jarak terlalu pendek untuk disimpan.</p>
-      )}
-      {isActive && (
-        <p className="run-hint">
-          Jam berhenti otomatis saat kamu berhenti bergerak. Biarkan layar
-          menyala agar GPS terus merekam jejakmu.
-        </p>
-      )}
     </div>
   )
 }

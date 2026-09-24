@@ -23,7 +23,8 @@ const CARD_W = 1080
 const CARD_H = 1920
 
 const CRIMSON = '#d9443c'
-const BRONZE = '#c9a44a'
+/** Lime highlight — mirrors --color-lime (canvas can't read CSS tokens). */
+const BRONZE = '#c8ea4c'
 const MARBLE = '#f4efe6'
 const MARBLE_DIM = 'rgba(226, 220, 208, 0.82)'
 const STONE = '#211f1c'
@@ -46,9 +47,9 @@ async function ensureFonts(): Promise<void> {
   if (!('fonts' in document)) return
   try {
     await Promise.all([
-      document.fonts.load('700 104px Cinzel'),
-      document.fonts.load('700 80px "IBM Plex Mono"'),
-      document.fonts.load('500 36px Inter'),
+      document.fonts.load('800 104px "Bricolage Grotesque"'),
+      document.fonts.load('600 36px Geist'),
+      document.fonts.load('500 36px Geist'),
     ])
     await document.fonts.ready
   } catch {
@@ -155,11 +156,11 @@ function drawTextBlock(
 
   drawLambda(ctx, x0, 1352, 52, BRONZE)
   ctx.fillStyle = BRONZE
-  ctx.font = '700 42px Cinzel, Georgia, serif'
+  ctx.font = '800 42px "Bricolage Grotesque", system-ui, sans-serif'
   ctx.fillText('SPRTAN', x0 + 78, 1352)
 
   ctx.fillStyle = MARBLE
-  ctx.font = '700 104px Cinzel, Georgia, serif'
+  ctx.font = '800 112px "Bricolage Grotesque", system-ui, sans-serif'
   ctx.fillText(runTitle(run.startedAt), x0, 1476)
 
   const pace = paceSecPerKm(run.distanceM, run.durationMs)
@@ -175,18 +176,18 @@ function drawTextBlock(
   let cx = x0
   for (const col of cols) {
     ctx.fillStyle = MARBLE_DIM
-    ctx.font = '500 36px Inter, system-ui, sans-serif'
+    ctx.font = '500 36px Geist, system-ui, sans-serif'
     ctx.fillText(col.label, cx, labelY)
 
     ctx.fillStyle = MARBLE
-    ctx.font = '700 80px "IBM Plex Mono", ui-monospace, monospace'
+    ctx.font = '800 84px "Bricolage Grotesque", system-ui, sans-serif'
     const valueW = ctx.measureText(col.value).width
     ctx.fillText(col.value, cx, valueY)
 
     let unitW = 0
     if (col.unit) {
       ctx.fillStyle = MARBLE_DIM
-      ctx.font = '500 40px Inter, system-ui, sans-serif'
+      ctx.font = '500 40px Geist, system-ui, sans-serif'
       const label = ` ${col.unit}`
       ctx.fillText(label, cx + valueW + 6, valueY)
       unitW = ctx.measureText(label).width + 6
@@ -252,7 +253,7 @@ function drawAttribution(ctx: CanvasRenderingContext2D): void {
   ctx.save()
   ctx.textBaseline = 'bottom'
   ctx.textAlign = 'right'
-  ctx.font = '400 26px Inter, system-ui, sans-serif'
+  ctx.font = '400 26px Geist, system-ui, sans-serif'
   ctx.fillStyle = 'rgba(255, 255, 255, 0.85)'
   ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'
   ctx.shadowBlur = 6

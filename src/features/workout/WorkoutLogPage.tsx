@@ -1,16 +1,23 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, makeId } from '../../db/database'
-import type { Exercise, SetEntry, Workout } from '../../db/types'
+import {
+  MUSCLE_GROUPS,
+  MUSCLE_GROUP_LABELS,
+  type Exercise,
+  type SetEntry,
+  type Workout,
+} from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
-import { Button, Card, EmptyState } from '../../components/ui/primitives'
+import { Card, EmptyState } from '../../components/ui/primitives'
+import { Icon } from '../../components/ui/Icon'
 import { todayISO, formatDate } from '../../lib/format'
 import { ExerciseBlock } from './ExerciseBlock'
 import './workout.css'
 
 export function WorkoutLogPage() {
   const [date, setDate] = useState(todayISO())
-  const [pickExercise, setPickExercise] = useState('')
   // Exercises added to the session that don't have any saved sets yet.
   const [pendingBlocks, setPendingBlocks] = useState<string[]>([])
 
@@ -57,28 +64,29 @@ export function WorkoutLogPage() {
     return w
   }
 
-  function addExerciseBlock() {
-    if (!pickExercise || blocks.includes(pickExercise)) {
-      setPickExercise('')
-      return
-    }
-    setPendingBlocks((prev) => [...prev, pickExercise])
-    setPickExercise('')
+  // Picking a movement adds it right away: one tap instead of pick + "Tambah".
+  function addExerciseBlock(exerciseId: string) {
+    if (!exerciseId || blocks.includes(exerciseId)) return
+    setPendingBlocks((prev) => [...prev, exerciseId])
   }
 
-  const available = exercises
-    .filter((e) => !blocks.includes(e.id))
-    .sort((a, b) => a.name.localeCompare(b.name))
+  const availableByGroup = MUSCLE_GROUPS.map((g) => ({
+    group: g,
+    items: exercises
+      .filter((e) => e.muscleGroup === g && !blocks.includes(e.id))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  })).filter((g) => g.items.length > 0)
 
   return (
     <div>
       <PageHeader
-        eyebrow="MEDAN LATIHAN"
-        title="Catat Latihan"
+        lead="Catat"
+        title="Latihan"
+        status={formatDate(date)}
         actions={
           <div className="field log-date">
-            <label className="field__label" htmlFor="log-date">
-              Tanggal
+            <label className="visually-hidden" htmlFor="log-date">
+              Tanggal latihan
             </label>
             <input
               id="log-date"
@@ -92,37 +100,38 @@ export function WorkoutLogPage() {
         }
       />
 
-      <p className="log-caption">{formatDate(date)}</p>
-
       <Card className="log-add-card">
-        <div className="log-add">
-          <div className="field log-add__select">
-            <label className="field__label" htmlFor="add-ex">
-              Tambah gerakan ke sesi
-            </label>
-            <select
-              id="add-ex"
-              className="select"
-              value={pickExercise}
-              onChange={(e) => setPickExercise(e.target.value)}
-            >
-              <option value="">— pilih gerakan —</option>
-              {available.map((e) => (
-                <option key={e.id} value={e.id}>
-                  {e.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <Button onClick={addExerciseBlock} disabled={!pickExercise}>
-            Tambah
-          </Button>
+        <div className="field">
+          <label className="field__label" htmlFor="add-ex">
+            Tambah gerakan ke sesi
+          </label>
+          <select
+            id="add-ex"
+            className="select"
+            value=""
+            onChange={(e) => addExerciseBlock(e.target.value)}
+          >
+            <option value="">Pilih gerakan…</option>
+            {availableByGroup.map(({ group, items }) => (
+              <optgroup key={group} label={MUSCLE_GROUP_LABELS[group]}>
+                {items.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.name}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         </div>
+        <Link to="/exercises" className="log-manage">
+          Gerakan tidak ada? Kelola daftar gerakan
+          <Icon name="arrow" size={16} />
+        </Link>
       </Card>
 
       {blocks.length === 0 ? (
         <EmptyState title="Sesi masih kosong.">
-          <p>Pilih gerakan di atas dan mulai menempa rekormu.</p>
+          <p>Pilih gerakan di atas, lalu catat set pertamamu.</p>
         </EmptyState>
       ) : (
         <div className="log-blocks">

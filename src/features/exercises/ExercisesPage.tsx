@@ -65,7 +65,7 @@ export function ExercisesPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="ARSENAL" title="Gerakan" />
+      <PageHeader lead="Daftar" title="Gerakan" back={{ to: '/log', label: 'Catat' }} />
 
       <Card className="exercise-form-card">
         <form className="exercise-form" onSubmit={addExercise}>

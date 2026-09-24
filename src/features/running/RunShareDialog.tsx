@@ -98,8 +98,7 @@ export function RunShareDialog({ run, onClose }: RunShareDialogProps) {
     >
       <div className="share-sheet" onClick={(e) => e.stopPropagation()}>
         <header className="share-sheet__head">
-          <span className="eyebrow">DROMOS</span>
-          <h2 className="share-sheet__title">Bagikan Capaian</h2>
+          <h2 className="share-sheet__title">Bagikan capaian</h2>
         </header>
 
         <div className="share-toggle" role="group" aria-label="Gaya kartu">

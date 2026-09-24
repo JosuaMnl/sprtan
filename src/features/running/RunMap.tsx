@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CircleMarker,
   MapContainer,
+  Pane,
   Polyline,
   TileLayer,
   useMap,
@@ -27,27 +28,18 @@ const RECENTER_THRESHOLD_M = 12
 // by reference and calls `setStyle()` (a redraw) whenever it gets a new object.
 // Inline literals would restyle every layer on every parent render.
 
+// Colours live in CSS (see the `.run-route*` / `.run-marker-*` classes).
 // Rounded joins and caps: the route reads as one continuous stroke instead of
 // a chain of visibly welded chunks.
 const ROUTE_STYLE: PathOptions = {
-  color: '#d9443c',
+  className: 'run-route',
   weight: 5,
-  opacity: 0.95,
   lineJoin: 'round',
   lineCap: 'round',
 }
-const START_STYLE: PathOptions = {
-  color: '#c9a44a',
-  fillColor: '#c9a44a',
-  fillOpacity: 1,
-  weight: 2,
-}
-const CURRENT_STYLE: PathOptions = {
-  color: '#fff',
-  fillColor: '#d9443c',
-  fillOpacity: 1,
-  weight: 3,
-}
+const ROUTE_GLOW_STYLE: PathOptions = { ...ROUTE_STYLE, className: 'run-route-glow', weight: 14 }
+const START_STYLE: PathOptions = { className: 'run-marker-start', weight: 3, fillOpacity: 1 }
+const CURRENT_STYLE: PathOptions = { className: 'run-marker-current', weight: 3, fillOpacity: 1 }
 
 interface RunMapProps {
   path: readonly GeoPoint[]
@@ -168,6 +160,24 @@ export const RunMap = memo(function RunMap({
           crossOrigin="anonymous"
         />
 
+        {/* Colours come from CSS (.run-route*) so the route follows the
+            light/dark surface tokens; SVG attributes can't read var().
+            The glow sits in its own pane whose opacity is applied to the pane
+            as a whole: consecutive chunks share a joint point, and per-stroke
+            alpha would darken every place where two chunks overlap. */}
+        <Pane name="routeGlowPane" className="run-route-glow-pane">
+          {chunks.map((chunk) =>
+            chunk.positions.length > 1 ? (
+              <Polyline
+                key={chunk.key}
+                positions={chunk.positions}
+                pathOptions={ROUTE_GLOW_STYLE}
+                smoothFactor={1.2}
+                interactive={false}
+              />
+            ) : null,
+          )}
+        </Pane>
         {chunks.map((chunk) =>
           chunk.positions.length > 1 ? (
             <Polyline

@@ -21,6 +21,7 @@ import {
 import { useUnit } from '../../settings/UnitContext'
 import { UNIT_LABEL, toDisplayWeight } from '../../lib/units'
 import { formatDateShort } from '../../lib/format'
+import { ProgressTabs } from './ProgressTabs'
 import './progress.css'
 
 const METRICS: ProgressMetric[] = ['est1RM', 'maxWeight', 'volume']
@@ -59,7 +60,8 @@ export function ProgressPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="JEJAK PENAKLUKAN" title="Progres" />
+      <PageHeader lead="Pantau" title="Progres" />
+      <ProgressTabs />
 
       <div className="progress-controls">
         <div className="field progress-controls__ex">
@@ -118,33 +120,35 @@ export function ProgressPage() {
                   <CartesianGrid stroke="var(--color-line)" strokeDasharray="2 4" vertical={false} />
                   <XAxis
                     dataKey="label"
-                    tick={{ fill: 'var(--color-ink-muted)', fontSize: 12, fontFamily: 'var(--font-mono)' }}
+                    tick={{ fill: 'var(--color-ink-muted)', fontSize: 12, fontFamily: 'var(--font-body)' }}
                     stroke="var(--color-line)"
                   />
                   <YAxis
-                    tick={{ fill: 'var(--color-ink-muted)', fontSize: 12, fontFamily: 'var(--font-mono)' }}
+                    tick={{ fill: 'var(--color-ink-muted)', fontSize: 12, fontFamily: 'var(--font-body)' }}
                     stroke="var(--color-line)"
                     width={48}
                   />
                   <Tooltip
                     contentStyle={{
-                      background: 'var(--color-paper-3)',
-                      border: '1px solid var(--color-bronze-dim)',
-                      borderRadius: '8px',
-                      fontFamily: 'var(--font-mono)',
-                      color: 'var(--color-ink)',
+                      background: 'var(--color-ink)',
+                      border: 'none',
+                      borderRadius: 'var(--radius-md)',
+                      fontFamily: 'var(--font-body)',
+                      color: 'var(--color-paper)',
+                      boxShadow: 'var(--shadow-lift)',
                     }}
-                    labelStyle={{ color: 'var(--color-bronze)' }}
-                    cursor={{ stroke: 'var(--color-bronze-dim)', strokeWidth: 1 }}
+                    itemStyle={{ color: 'var(--color-paper)', fontWeight: 600 }}
+                    labelStyle={{ color: 'var(--color-lime)' }}
+                    cursor={{ stroke: 'var(--color-ink-ghost)', strokeWidth: 1 }}
                   />
                   <Line
                     type="monotone"
                     dataKey="value"
                     name={METRIC_LABELS[metric]}
-                    stroke="var(--color-accent-hi)"
-                    strokeWidth={2.5}
-                    dot={{ fill: 'var(--color-bronze)', r: 3 }}
-                    activeDot={{ r: 5, fill: 'var(--color-accent-hi)' }}
+                    stroke="var(--color-accent)"
+                    strokeWidth={3}
+                    dot={{ fill: 'var(--color-surface)', stroke: 'var(--color-accent)', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: 'var(--color-accent)', stroke: 'var(--color-surface)', strokeWidth: 2 }}
                   />
                 </LineChart>
               </ResponsiveContainer>

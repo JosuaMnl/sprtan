@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { createHashRouter, RouterProvider } from 'react-router-dom'
 import { AppShell } from './components/layout/AppShell'
 import { UnitProvider } from './settings/UnitContext'
+import { ThemeProvider } from './settings/ThemeContext'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { WorkoutLogPage } from './features/workout/WorkoutLogPage'
 import { RecordsPage } from './features/records/RecordsPage'
@@ -27,9 +28,7 @@ const RunDetailPage = lazy(() =>
 
 function Loading() {
   return (
-    <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-ink-muted)' }}>
-      Memuat…
-    </p>
+    <p className="loading">Memuat…</p>
   )
 }
 
@@ -82,8 +81,10 @@ const router = createHashRouter([
 
 export function App() {
   return (
-    <UnitProvider>
-      <RouterProvider router={router} />
-    </UnitProvider>
+    <ThemeProvider>
+      <UnitProvider>
+        <RouterProvider router={router} />
+      </UnitProvider>
+    </ThemeProvider>
   )
 }

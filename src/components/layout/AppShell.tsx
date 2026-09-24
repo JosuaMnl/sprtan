@@ -1,79 +1,129 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Lambda } from '../ui/Lambda'
+import { Icon, type IconName } from '../ui/Icon'
+import { useTheme } from '../../settings/ThemeContext'
 import './AppShell.css'
 
 interface NavItem {
   to: string
   label: string
-  icon: string
+  icon: IconName
+  /** Route prefixes that light this item up (sub-pages count as the parent). */
+  match: string[]
 }
 
+/** Four destinations only. Rekor lives inside Progres, Gerakan inside Catat,
+ *  Pengaturan behind the gear icon. */
 const NAV: NavItem[] = [
-  { to: '/', label: 'Arena', icon: '⌂' },
-  { to: '/log', label: 'Catat', icon: '✎' },
-  { to: '/progress', label: 'Progres', icon: '📈' },
-  { to: '/run', label: 'Lari', icon: '🏃' },
-  { to: '/records', label: 'Rekor', icon: '🏛' },
-  { to: '/exercises', label: 'Gerakan', icon: '≡' },
-  { to: '/settings', label: 'Atur', icon: '⚙' },
+  { to: '/', label: 'Beranda', icon: 'home', match: [] },
+  { to: '/log', label: 'Catat', icon: 'plus', match: ['/log', '/exercises'] },
+  { to: '/run', label: 'Lari', icon: 'run', match: ['/run'] },
+  { to: '/progress', label: 'Progres', icon: 'chart', match: ['/progress', '/records'] },
 ]
 
+function isActive(item: NavItem, pathname: string): boolean {
+  if (item.to === '/') return pathname === '/'
+  return item.match.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+}
+
 export function AppShell() {
+  const { pathname } = useLocation()
+  const { theme, toggle } = useTheme()
+  const onSettings = pathname === '/settings' || pathname === '/privasi'
+  const nextLabel = theme === 'dark' ? 'Mode terang' : 'Mode gelap'
+
+  const themeButton = (
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={toggle}
+      aria-label={`Ganti ke ${nextLabel.toLowerCase()}`}
+      title={nextLabel}
+    >
+      <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
+      <span className="theme-toggle__label">{nextLabel}</span>
+    </button>
+  )
+
   return (
     <div className="shell">
+      {/* Hash routing owns location.hash, so focus <main> directly instead of
+          following "#main" (which the router would read as a route). */}
+      <a
+        href="#main"
+        className="skip-link"
+        onClick={(e) => {
+          e.preventDefault()
+          document.getElementById('main')?.focus()
+        }}
+      >
+        Lewati ke konten
+      </a>
+
       <header className="rail">
-        <div className="rail__brand">
-          <Lambda size={34} />
+        <Link to="/" className="rail__brand" aria-label="Sprtan, ke beranda">
+          <Lambda size={32} />
           <span className="rail__wordmark">SPRTAN</span>
-        </div>
+        </Link>
+
         <nav className="rail__nav" aria-label="Navigasi utama">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) =>
-                `rail__link ${isActive ? 'is-active' : ''}`
-              }
-            >
-              <span className="rail__link-icon" aria-hidden>
-                {item.icon}
-              </span>
-              {item.label}
-            </NavLink>
-          ))}
+          {NAV.map((item) => {
+            const active = isActive(item, pathname)
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`rail__link ${active ? 'is-active' : ''}`}
+                aria-current={active ? 'page' : undefined}
+              >
+                <Icon name={item.icon} className="rail__link-icon" />
+                {item.label}
+              </Link>
+            )
+          })}
         </nav>
-        <p className="rail__foot">
-          Sprtan v0.1
-          <br />
-          ΜΟΛΩΝ ΛΑΒΕ
-          <br />
-          <Link to="/privasi" className="rail__foot-link">
-            Kebijakan Privasi
+
+        <div className="rail__foot">
+          {themeButton}
+          <Link
+            to="/settings"
+            className={`rail__settings ${onSettings ? 'is-active' : ''}`}
+            aria-current={onSettings ? 'page' : undefined}
+            aria-label="Pengaturan"
+          >
+            <Icon name="gear" />
+            <span className="rail__settings-label">Pengaturan</span>
           </Link>
-        </p>
+          <p className="rail__meta">
+            Data tersimpan di perangkat ·{' '}
+            <Link to="/privasi" className="rail__foot-link">
+              Privasi
+            </Link>
+          </p>
+        </div>
       </header>
 
-      <main className="main">
+      <main id="main" className="main" tabIndex={-1}>
         <Outlet />
       </main>
 
       <nav className="tabbar" aria-label="Navigasi bawah">
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              `tabbar__link ${isActive ? 'is-active' : ''}`
-            }
-          >
-            <span className="tabbar__icon" aria-hidden>
-              {item.icon}
-            </span>
-            {item.label}
-          </NavLink>
-        ))}
+        {NAV.map((item) => {
+          const active = isActive(item, pathname)
+          return (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`tabbar__link ${active ? 'is-active' : ''}`}
+              aria-current={active ? 'page' : undefined}
+            >
+              <span className="tabbar__icon">
+                <Icon name={item.icon} size={22} />
+              </span>
+              <span className="tabbar__label">{item.label}</span>
+            </Link>
+          )
+        })}
       </nav>
     </div>
   )
