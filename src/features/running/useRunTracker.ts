@@ -13,6 +13,12 @@ import {
   rollingPaceSecPerKm,
   smoothPoint,
 } from '../../lib/geo'
+import {
+  type LocationError,
+  type StopWatching,
+  isLocationSupported,
+  watchLocation,
+} from '../../lib/locationSource'
 
 export type RunStatus = 'idle' | 'tracking' | 'paused' | 'finished'
 
@@ -54,12 +60,7 @@ export interface RunTracker extends RunTrackerState {
 /** How often the readouts refresh. */
 const TICK_MS = 500
 
-interface GeoLocationPositionErrorLike {
-  code: number
-  message: string
-}
-
-function geoErrorMessage(err: GeoLocationPositionErrorLike): string {
+function geoErrorMessage(err: LocationError): string {
   switch (err.code) {
     case 1:
       return 'Izin lokasi ditolak. Aktifkan akses lokasi untuk melacak lari.'
@@ -106,7 +107,8 @@ function bankClock(clock: Clock, until: number): void {
 }
 
 /**
- * Tracks a run via the Geolocation API.
+ * Tracks a run via `watchLocation` (the Geolocation API in the browser, the
+ * background-location plugin inside the native shell).
  *
  * Every incoming fix runs the staged pipeline documented in lib/geo.ts:
  * accuracy gate → teleport gate → Kalman smoothing → jitter floor → moving-time
@@ -135,7 +137,7 @@ export function useRunTracker(): RunTracker {
   const [elevationGain, setElevationGain] = useState(0)
   const [paceSecPerKm, setPaceSecPerKm] = useState(0)
 
-  const watchId = useRef<number | null>(null)
+  const stopWatching = useRef<StopWatching | null>(null)
   const tickId = useRef<ReturnType<typeof setInterval> | null>(null)
   const wakeLock = useRef<WakeLockSentinelLike | null>(null)
 
@@ -162,10 +164,8 @@ export function useRunTracker(): RunTracker {
   const autoPausedRef = useRef(false)
 
   const clearWatch = useCallback(() => {
-    if (watchId.current != null && navigator.geolocation) {
-      navigator.geolocation.clearWatch(watchId.current)
-    }
-    watchId.current = null
+    stopWatching.current?.()
+    stopWatching.current = null
   }, [])
 
   const clearTick = useCallback(() => {
@@ -215,15 +215,7 @@ export function useRunTracker(): RunTracker {
     }
   }, [clearWatch, clearTick, releaseWakeLock])
 
-  const handlePosition = useCallback((pos: GeolocationPosition) => {
-    const raw: GeoPoint = {
-      lat: pos.coords.latitude,
-      lng: pos.coords.longitude,
-      t: pos.timestamp,
-      alt: pos.coords.altitude ?? undefined,
-      acc: pos.coords.accuracy ?? undefined,
-    }
-
+  const handlePosition = useCallback((raw: GeoPoint) => {
     setError(null)
     setAccuracyM(raw.acc ?? null)
 
@@ -309,7 +301,7 @@ export function useRunTracker(): RunTracker {
   }, [])
 
   const handleError = useCallback(
-    (err: GeolocationPositionError) => {
+    (err: LocationError) => {
       setError(geoErrorMessage(err))
       // PERMISSION_DENIED (1) is unrecoverable — keeping the watch and the
       // elapsed clock running would show a "tracking" UI that records nothing.
@@ -328,19 +320,13 @@ export function useRunTracker(): RunTracker {
   )
 
   const beginWatch = useCallback(() => {
-    if (!navigator.geolocation) {
+    if (!isLocationSupported()) {
       setError('Perangkat ini tidak mendukung GPS.')
       return false
     }
     // Already watching (e.g. resuming from a pause, where we keep the lock).
-    if (watchId.current != null) return true
-    watchId.current = navigator.geolocation.watchPosition(
-      handlePosition,
-      handleError,
-      // maximumAge: 0 — a cached fix from before the run started is stale by
-      // definition and would anchor the track to wherever the phone last was.
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 30_000 },
-    )
+    if (stopWatching.current != null) return true
+    stopWatching.current = watchLocation(handlePosition, handleError)
     return true
   }, [handlePosition, handleError])
 

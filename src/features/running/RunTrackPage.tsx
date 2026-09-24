@@ -17,6 +17,7 @@ import {
 import { DEFAULT_MAX_ACCURACY_M, paceSecPerKm } from '../../lib/geo'
 import { setAdRequestsPaused } from '../../lib/ads'
 import { partOfDay, todayISO } from '../../lib/format'
+import { canTrackInBackground } from '../../lib/locationSource'
 import { useRunTracker, type RunStatus } from './useRunTracker'
 import { RunMap } from './RunMap'
 import './run.css'
@@ -273,8 +274,10 @@ export function RunTrackPage() {
         )}
         {isActive && (
           <p className="run-hint">
-            Jam berhenti otomatis saat kamu berhenti bergerak. Biarkan layar
-            menyala agar GPS terus merekam jejakmu.
+            Jam berhenti otomatis saat kamu berhenti bergerak.
+            {/* The native app keeps recording with the screen off. */}
+            {!canTrackInBackground() &&
+              ' Biarkan layar menyala agar GPS terus merekam jejakmu.'}
           </p>
         )}
       </div>
