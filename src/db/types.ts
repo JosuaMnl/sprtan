@@ -69,10 +69,15 @@ export interface GeoPoint {
 }
 
 /**
- * A recorded run. Distance is stored canonically in meters (like weight is
- * stored in kg); display units are derived per the user's unit setting.
+ * A recorded run's summary, as stored in the `runs` table. Distance is stored
+ * canonically in meters (like weight is stored in kg); display units are
+ * derived per the user's unit setting.
+ *
+ * The GPS track lives in `runPaths` instead: lists and totals only need these
+ * few fields, and loading every run's thousands of points to show them was the
+ * main cost of the history page.
  */
-export interface Run {
+export interface RunSummary {
   id: string
   /** ISO date string, YYYY-MM-DD (local day the run started) */
   date: string
@@ -90,8 +95,19 @@ export interface Run {
   distanceM: number
   /** cumulative elevation gain in meters (approx, may be 0 if no altitude) */
   elevationGainM: number
-  /** ordered GPS track */
-  path: GeoPoint[]
   notes: string
   createdAt: number
+}
+
+/** A run's GPS track, stored in `runPaths` under the same id as its summary. */
+export interface RunPath {
+  id: string
+  /** ordered GPS track */
+  path: GeoPoint[]
+}
+
+/** A run together with its track: what the detail view and share card use. */
+export interface Run extends RunSummary {
+  /** ordered GPS track */
+  path: GeoPoint[]
 }

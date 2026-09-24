@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../../db/database'
-import type { Run } from '../../db/types'
+import type { RunSummary } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { EmptyState, StatRow, buttonClass } from '../../components/ui/primitives'
 import { Icon } from '../../components/ui/Icon'
@@ -26,7 +26,7 @@ export function RunHistoryPage() {
     () => db.runs.orderBy('startedAt').reverse().toArray(),
     [],
     [],
-  ) as Run[]
+  ) as RunSummary[]
 
   const totals = useMemo(() => {
     const distanceM = runs.reduce((sum, r) => sum + r.distanceM, 0)

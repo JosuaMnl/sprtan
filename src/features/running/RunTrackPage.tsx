@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useBlocker, useNavigate } from 'react-router-dom'
-import { db, makeId } from '../../db/database'
+import { makeId } from '../../db/database'
+import { saveRun as storeRun } from '../../db/runs'
 import type { Run } from '../../db/types'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button, StatRow } from '../../components/ui/primitives'
@@ -124,7 +125,7 @@ export function RunTrackPage() {
         notes: '',
         createdAt: Date.now(),
       }
-      await db.runs.add(run)
+      await storeRun(run)
       bypassGuard.current = true
       tracker.reset()
       navigate(`/run/${run.id}`)
