@@ -7,7 +7,22 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ## [Unreleased]
 
+### Added
+
+- **Aplikasi Android via Capacitor 7**: proyek native di `android/`, config di
+  `capacitor.config.ts`. Di aplikasi native, GPS lari memakai plugin
+  `@capacitor-community/background-geolocation` (foreground service dengan
+  notifikasi "Sedang merekam lari"), jadi rute tetap terekam saat layar mati
+  atau pindah aplikasi. Versi web (PWA) tetap memakai Geolocation API browser.
+- Script baru: `build:native` (build tanpa service worker), `cap:sync`
+  (build native lalu salin ke proyek Android), `cap:open` (buka Android Studio).
+
 ### Changed
+
+- `useRunTracker` membaca lokasi lewat adapter baru `src/lib/locationSource.ts`
+  yang memilih plugin native atau Geolocation API browser secara otomatis.
+- Petunjuk "Biarkan layar menyala" di layar lari kini hanya tampil di versi
+  web, karena aplikasi native tetap merekam saat layar mati.
 
 - **Redesign UI seluruh aplikasi**: gaya aplikasi lari modern mengikuti 2
   referensi: tema terang untuk semua halaman, layar tracking lari (`#/run/track`)

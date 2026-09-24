@@ -3,10 +3,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(({ command, mode }) => ({
   plugins: [
     react(),
     VitePWA({
+      // `vite build --mode native` produces the bundle for the Capacitor shell.
+      // The files already live on the device there, so a service worker only
+      // adds a cache that can pin the WebView to an outdated build.
+      disable: mode === 'native',
       registerType: 'autoUpdate',
       includeAssets: ['lambda.svg', 'icons/apple-touch-icon.png'],
       manifest: {
