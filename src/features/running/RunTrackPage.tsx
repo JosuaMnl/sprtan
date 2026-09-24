@@ -14,6 +14,7 @@ import {
   formatPace,
 } from '../../lib/distance'
 import { DEFAULT_MAX_ACCURACY_M, paceSecPerKm } from '../../lib/geo'
+import { setAdRequestsPaused } from '../../lib/ads'
 import { partOfDay, todayISO } from '../../lib/format'
 import { useRunTracker, type RunStatus } from './useRunTracker'
 import { RunMap } from './RunMap'
@@ -80,6 +81,13 @@ export function RunTrackPage() {
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
   }, [isActive])
+
+  // No new ad requests while the tracker is open: an ad loading mid-run costs
+  // network and CPU and can shift the controls under the runner's thumb.
+  useEffect(() => {
+    setAdRequestsPaused(true)
+    return () => setAdRequestsPaused(false)
+  }, [])
 
   // Guard in-app navigation (nav taps, back button) while tracking/paused.
   const blocker = useBlocker(

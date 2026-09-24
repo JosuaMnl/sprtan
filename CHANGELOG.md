@@ -70,6 +70,16 @@ dan proyek ini memakai [Semantic Versioning](https://semver.org/lang/id/).
 
 ### Changed
 
+- **Aplikasi tidak lagi menunggu Google Fonts untuk mulai.** Stylesheet font
+  dimuat tanpa memblokir render (`rel="preload"` lalu ditukar jadi stylesheet),
+  karena stylesheet pihak ketiga yang memblokir juga menahan eksekusi script
+  aplikasi; di koneksi lambat saat lari, aplikasi bisa tertahan lama. Teks
+  tampil dengan font cadangan lalu berganti saat font tiba. Geist diminta
+  sebagai rentang `400..700` (CSS font 20 blok jadi 5).
+- **Iklan AdSense ditahan di layar pelacakan lari** lewat `pauseAdRequests`
+  (`src/lib/ads.ts`), termasuk saat aplikasi dibuka langsung ke `#/run/track`.
+  Pengecualian halaman di dashboard AdSense tidak bisa dipakai karena tidak
+  mendukung URL dengan `#`. Iklan dilanjutkan begitu keluar dari layar lari.
 - **Peta lari lebih hemat baterai saat melacak.** `RunMap` kini di-memo dan
   gaya garis/penanda jadi konstanta, sehingga tick pembacaan 500 ms tidak lagi
   memicu `setStyle()`/`setLatLng()` Leaflet di setiap layer. Rute juga dibangun
